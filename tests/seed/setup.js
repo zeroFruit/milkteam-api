@@ -1,14 +1,36 @@
-import mongoose from 'mongoose';
+import {ObjectID} from 'mongodb';
+import jwt        from 'jsonwebtoken';
 
-mongoose.Promise = global.Promise;
+import {User}     from '../../models/user';
 
-before((done) => {
-  mongoose.connect(process.env.MONGODB_URI);
-  mongoose.connection
-    .once('open', () => done())
-    .on('error', (error) => console.warn('Error', error));
-});
+const userOneId = new ObjectID();
+const userTwoId = new ObjectID();
 
-beforeEach((done) => {
-  // init db collections
-});
+const users = [{
+  _id: userOneId,
+  email: 'userOne@example.com',
+  password: 'userOnePass',
+  tokens: [{
+    access: 'auth',
+    token: jwt.sign({_id: userOneId, access: 'auth'}, process.env.JWT_SECRET).toString()
+  }]
+}, {
+  _id: userTwoId,
+  email: 'userTwo@example.com',
+  password: 'userTwoPass',
+  tokens: [{
+    access: 'auth',
+    token: jwt.sign({_id: userTwoId, access: 'auth'}, process.env.JWT_SECRET).toString()
+  }]
+}];
+
+const populateUsers = (done) => {
+  User.remove({}).then(() => {
+    let userOne = new User(users[0]).save();
+    let userTwo = new User(users[1]).save();
+
+    return Promise.all([userOne, userTwo]);
+  }).then(() => done());
+};
+
+module.exports = {users, populateUsers};

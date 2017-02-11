@@ -1,7 +1,7 @@
-import hello from './hello';
+import userRouter from './user';
 
 const set = (app) => {
-  hello(app);
+  userRouter(app);
 }
 
 module.exports = set;
