@@ -16,14 +16,17 @@ app.use(bodyParser.json());
 import Router from './router/index';
 Router(app);
 
-
 let server = http.Server(app);
 
-import mainChatSocket from './socket/mainChat';
-mainChatSocket.connect(server);
+// import socketIO       from 'socket.io';
+// const MAIN_CHAT_URL = '/api/socket/main';
+// const ioMainChat = socketIO(server, {path: MAIN_CHAT_URL});
 
-import subChatSocket from './socket/subChat';
-subChatSocket.connect(server);
+import mainChatSocket from './socket/mainChat';
+mainChatSocket(server);
+//
+// import subChatSocket from './socket/subChat';
+// subChatSocket.connect(server);
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, './public/index.html'));

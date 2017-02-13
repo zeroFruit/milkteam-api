@@ -1,15 +1,15 @@
 import expect     from 'expect';
 import request    from 'supertest';
 import faker      from 'faker';
-import {ObjectID} from 'mongodb';
 
 import {app}      from '../app';
 import {User}     from '../models/user';
 import {users, populateUsers} from './seed/setup';
 
-beforeEach(populateUsers);
 
 describe('POST /users', () => {
+  beforeEach(populateUsers);
+
   it('should create a user', (done) => {
     let email = faker.internet.email();
     let password = faker.random.number();

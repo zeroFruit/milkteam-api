@@ -1,24 +1,24 @@
+import {server} from '../app';
 import expect from 'expect';
 import {
   chatters,
   mainChatRooms,
   populateRoom,
-  option,
-  socketURL
+  options,
+  SOCKET_URL
 } from './seed/socket.setup.js';
-import mainChatSocket from '../socket/mainChat';
-import {server} from '../app';
 import io from 'socket.io-client';
+import io_server from 'socket.io';
 
-describe('Main Chat Connection', () => {
+describe('Socket.io', () => {
+  let socket;
+
   it('should successfully connected to socket server', (done) => {
-    mainChatSocket.connect(server);
-    let socket = io(socketURL, option);
+    socket = io.connect(SOCKET_URL, options);
 
-    socket.on('connect', () => {
-      console.log('client - Connected!');
+    socket.on('hello', ({message}) => {
+      expect(message).toBe('hello');
       done();
     });
-
   });
 });

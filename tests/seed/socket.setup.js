@@ -1,7 +1,7 @@
 import {MainChatRoom} from '../../models/mainChat';
 
-const socketURL = 'http://localhost:3000';
-const option = {
+const SOCKET_URL = 'http://ec2-52-78-175-43.ap-northeast-2.compute.amazonaws.com:3000';
+const options = {
   path: '/api/socket/main'
 };
 
@@ -33,4 +33,4 @@ const populateRoom = (done) => {
   });
 };
 
-module.exports = {chatters, mainChatRooms, populateRoom, option, socketURL};
+module.exports = {chatters, mainChatRooms, populateRoom, options, SOCKET_URL};
