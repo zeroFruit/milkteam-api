@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+  </head>
+  <body class="centered-form">
+    <h2>Chat!</h2>
+    <script src="/api/socket/sub/socket.io.js"></script>
+    <script>
+      var ROOT_URL = 'http://ec2-52-78-175-43.ap-northeast-2.compute.amazonaws.com:3000';
+      var socket = io.connect(ROOT_URL, {path: '/api/socket/sub'});
+
+      // socket.on('connect', function() {
+      //   console.log('connected to server');
+      // });
+      //
+      // socket.on('disconnect', function () {
+      //   console.log('Disconnected from server');
+      // });
+    </script>
+  </body>
+</html>

@@ -18,6 +18,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     require: true
   },
+  displayName: {
+    type: String,
+    require: true
+  },
   tokens: [{
     access: {
       type: String,
