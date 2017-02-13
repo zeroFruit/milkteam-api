@@ -38,15 +38,16 @@ MainChatRoomSchema.statics.addChatter = function (videoId, chatter) {
   })
 };
 
-MainChatRoomSchema.statics.removeChatter = function (videoId, chatterId) {
+MainChatRoomSchema.statics.removeChatter = function (videoId, chatter) {
   let Room = this;
 
   return new Promise((resolve, reject) => {
     Room.findOne({ videoId }).then((room) => {
-      room.chatters = room.chatters.filter((chatter) => chatter.id !== chatterId);
+      let out = room.chatters.filter((chat) => chat.id === chatter.id);
+      room.chatters = room.chatters.filter((chat) => chat.id !== chatter.id);
 
       return room.save()
-        .then(resolve)
+        .then(resolve(out))
         .catch(reject);
     })
   })

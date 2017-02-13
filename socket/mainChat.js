@@ -1,11 +1,14 @@
 import socketIO       from 'socket.io';
+import _              from 'lodash';
 import faker          from 'faker'
-//import {socketAuth as authenticate} from '../helpers/helper';
 import {MainChatRoom} from '../models/mainChat';
-import {User} from '../models/user';
+import {User}         from '../models/user';
+import {redisClient}  from '../config/redis';
+import {isRealString, createMessage} from '../helpers/helper';
 
 
 const MAIN_CHAT_URL = '/api/socket/main';
+const MAIN_CHAT_REDIS_KEY = "main";
 
 module.exports = (server) => {
   const io = socketIO(server, {path: MAIN_CHAT_URL});
@@ -35,10 +38,16 @@ module.exports = (server) => {
 
         socket.join(videoId);
 
+        redisClient.hget(MAIN_CHAT_REDIS_KEY, chatter.id, (err, reply) => {
+          if (!reply) {
+            redisClient.hmset(MAIN_CHAT_REDIS_KEY, chatter.id, videoId);
+          }
+        });
+
         MainChatRoom.removeChatter(videoId, chatter).then(() => {
           MainChatRoom.addChatter(videoId, chatter).then(() => {
-            socket.emit('newUser', {msg: `WELCOME MESSAGE TO ${chatter.displayName}`});
-            socket.broadcast.to(videoId).emit('newUser', {msg: 'NEW USER ALERT MESSAGE'});
+            socket.emit('createMessage', {msg: `WELCOME MESSAGE TO ${chatter.displayName}`});
+            socket.broadcast.to(videoId).emit('createMessage', {msg: 'NEW USER ALERT MESSAGE'});
 
             callback();
           });
@@ -46,50 +55,37 @@ module.exports = (server) => {
       });
     });
 
-    socket.on('disconnect', () => {
+    socket.on('createMessage', (message, callback) => {
+      let videoId = redisClient.hget(MAIN_CHAT_REDIS_KEY, socket.id, (err, reply) => {
+        if (!err && reply) {
+          return videoId;
+        } else {
+          console.log(err);
+        }
+      });
+
+      if (isRealString(message.text)) {
+        io.to(videoId).emit('newMessage', generateMessage(socket.id, message.text));
+      }
+
+      callback();
+    });
+
+    socket.on('disconnect', (params, callback) => {
+      let {videoId, user: {token}} = params;
+      let chatter = { id: socket.id };
+
       console.log('User was disconnected');
+
+      redisClient.hget(MAIN_CHAT_REDIS_KEY, chatter.id, (err, reply) => {
+        if (reply) {
+          redisClient.hdel(MAIN_CHAT_REDIS_KEY, chatter.id);
+        }
+      })
+
+      MainChatRoom.removeChatter(videoId, chatter).then((chatter) => {
+        io.to.emit('createMessage', {msg: `${chatter.displayName} LEFT`});
+      });
     });
   });
 };
-// const io = socketIO(server, {path: MAIN_CHAT_URL});
-//
-// io.on('connection', (socket) => {
-//   console.log('New user connected to MAIN chat');
-
-  // 게시물 번호에 따라서 room이 나뉨.
-
-
-  // socket.on('join', (params) => {
-  //   // 첫 번째, 토큰 인증 필요.
-  //   // 1. 토큰이 유효하다면, 사용자 아이디이름으로 room 접속
-  //   // 2. 토큰이 유효하지 않거나, 없다면 익명의 사용자로 room 접속
-  //   let {tag, user: { token }} = params;
-  //   let user = authenticate(token);
-  //
-  //   console.log(user);
-  //
-  //   let chatter = {
-  //     id: socket.id
-  //   }
-  //   if (!user) {
-  //     // 익명인 경우
-  //     chatter.displayName = faker.internet.userName;
-  //   } else {
-  //     // 유저인 경우
-  //     chatter.displayName = user.displayName;
-  //   }
-  //   // 두 번째, Collection update
-  //   MainChatRoom.addChatter(chatter, tag);
-
-    // Room 입장
-
-  // });
-
-//   socket.on('disconnect', () => {
-//     console.log('User was disconnected');
-//
-//     // let {tag, user: { token }} = params;
-//     //
-//     // MainChatRoom.removeChatter(socket.id, tag);
-//   });
-// });

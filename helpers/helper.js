@@ -4,6 +4,13 @@ const responseByCode = (res, code, status = 200) => {
   res.status(status).json({code});
 }
 
+const isRealString = (str) => {
+  return typeof str === 'string' && str.trim().length > 0;
+};
+
+const generateMessage = (from, text) => {
+  return { from, text };
+};
 
 const YouTubeGetID = (url) => {
   let ID = '';
@@ -21,6 +28,7 @@ const YouTubeGetID = (url) => {
 
 module.exports = {
   responseByCode,
-  //socketAuth,
+  isRealString,
+  generateMessage,
   YouTubeGetID
 }

@@ -28,7 +28,7 @@ describe('Main Chatroom test', () => {
   });
 
   it('should remove chatter from room', (done) => {
-    MainChatRoom.removeChatter(mainChatRooms.videoId, chatters[0].id).then(() => {
+    MainChatRoom.removeChatter(mainChatRooms.videoId, chatters[0]).then(() => {
       MainChatRoom.findOne({videoId: mainChatRooms.videoId}).then((room) => {
         expect(room.chatters.length).toBe(2);
         done();
