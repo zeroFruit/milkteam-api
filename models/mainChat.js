@@ -24,24 +24,32 @@ const MainChatRoomSchema = new mongoose.Schema({
 //   });
 // }
 
-MainChatRoomSchema.statics.addChatter = function (chatter, videoId) {
+MainChatRoomSchema.statics.addChatter = function (videoId, chatter) {
   let Room = this;
 
-  return Room.find({ videoId }).then((room) => {
-    room.chatters.push(chatter);
+  return new Promise((resolve, reject) => {
+    Room.findOne({ videoId }).then((room) => {
+      room.chatters.push(chatter);
 
-    return room.save();
-  });
+      return room.save()
+        .then(resolve)
+        .catch(reject);
+    })
+  })
 };
 
-MainChatRoomSchema.statics.removeChatter = function (videoId, tag) {
+MainChatRoomSchema.statics.removeChatter = function (videoId, chatterId) {
   let Room = this;
 
-  return Room.find({ videoId }).then((room) => {
-    room.chatters = room.chatters.map((chat) => chat.id !== id);
+  return new Promise((resolve, reject) => {
+    Room.findOne({ videoId }).then((room) => {
+      room.chatters = room.chatters.filter((chatter) => chatter.id !== chatterId);
 
-    return room.save();
-  });
+      return room.save()
+        .then(resolve)
+        .catch(reject);
+    })
+  })
 };
 
 const MainChatRoom = mongoose.model('mainchat', MainChatRoomSchema);

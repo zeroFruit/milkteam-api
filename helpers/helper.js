@@ -4,15 +4,6 @@ const responseByCode = (res, code, status = 200) => {
   res.status(status).json({code});
 }
 
-const socketAuth = (token) => {
-    User.findByToken(token).then((user) => {
-      if (!user) {
-        return undefined;
-      } else {
-        return user;
-      }
-    }).catch((e) => undefined);
-}
 
 const YouTubeGetID = (url) => {
   let ID = '';
@@ -30,6 +21,6 @@ const YouTubeGetID = (url) => {
 
 module.exports = {
   responseByCode,
-  socketAuth,
+  //socketAuth,
   YouTubeGetID
 }

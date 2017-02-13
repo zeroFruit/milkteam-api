@@ -1,22 +1,54 @@
 import socketIO       from 'socket.io';
-import http           from 'http';
 import faker          from 'faker'
-import {socketAuth as authenticate} from '../helpers/helper';
+//import {socketAuth as authenticate} from '../helpers/helper';
 import {MainChatRoom} from '../models/mainChat';
+import {User} from '../models/user';
 
 
 const MAIN_CHAT_URL = '/api/socket/main';
 
 module.exports = (server) => {
   const io = socketIO(server, {path: MAIN_CHAT_URL});
-  console.log('Socket.io server setup');
 
   io.on('connection', (socket) => {
     console.log('New user connected to Main chat');
+    /*
+      params: {
+        videoId,
+        user: {
+          token
+        }
+      }
+    */
+    socket.on('join', (params, callback) => {
+      let {videoId, user: {token}} = params;
+      let chatter = { id: socket.id };
 
-    socket.emit('hello', {
-      message: 'hello'
-    })
+      User.findByToken(token).then((user) => {
+        if (!user) {
+          chatter.displayName = faker.internet.userName;
+          chatter.anonymous = true;
+        } else {
+          chatter.displayName = user.displayName;
+          chatter.anonymous = false;
+        }
+
+        socket.join(videoId);
+
+        MainChatRoom.removeChatter(videoId, chatter).then(() => {
+          MainChatRoom.addChatter(videoId, chatter).then(() => {
+            socket.emit('newUser', {msg: `WELCOME MESSAGE TO ${chatter.displayName}`});
+            socket.broadcast.to(videoId).emit('newUser', {msg: 'NEW USER ALERT MESSAGE'});
+
+            callback();
+          });
+        });
+      });
+    });
+
+    socket.on('disconnect', () => {
+      console.log('User was disconnected');
+    });
   });
 };
 // const io = socketIO(server, {path: MAIN_CHAT_URL});
@@ -26,14 +58,7 @@ module.exports = (server) => {
 
   // 게시물 번호에 따라서 room이 나뉨.
 
-  // /*
-  //   params: {
-  //     tag,
-  //     user: {
-  //       token
-  //     }
-  //   }
-  // */
+
   // socket.on('join', (params) => {
   //   // 첫 번째, 토큰 인증 필요.
   //   // 1. 토큰이 유효하다면, 사용자 아이디이름으로 room 접속
