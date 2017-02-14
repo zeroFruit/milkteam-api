@@ -2,6 +2,9 @@ import {User}           from '../models/user';
 import Code             from '../config/responseCode';
 import {responseByCode} from '../helpers/helper';
 
+/*
+  (token) -> (user, token)
+*/
 async function authenticate (req, res, next) {
   let token = req.header('x-auth');
 

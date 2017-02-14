@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node ./node_modules/babel-cli/bin/babel-node.js app.js",
     "watch": "nodemon --exec node ./node_modules/babel-cli/bin/babel-node.js app.js",
-    "test": "SET \"NODE_ENV=test\" || export NODE_ENV=test && mocha --compilers js:babel-core/register --require babel-polyfill ./tests/*.test.js",
+    "test": "export NODE_ENV=test && mocha --compilers js:babel-core/register --require babel-polyfill ./tests/*.test.js",
     "test-watch": "nodemon --exec npm run test"
   },
   "engines": {
@@ -23,6 +23,7 @@
     "faker": "^3.1.0",
     "mocha": "^3.2.0",
     "nodemon": "^1.11.0",
+    "socket.io-client": "^1.7.2",
     "supertest": "^3.0.0"
   },
   "dependencies": {
@@ -33,6 +34,8 @@
     "jsonwebtoken": "^7.2.1",
     "mongodb": "^2.2.22",
     "mongoose": "^4.8.1",
+    "redis": "^2.6.5",
+    "socket.io": "^1.7.2",
     "validator": "^6.2.1"
   }
 }

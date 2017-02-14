@@ -1,22 +1,23 @@
 import expect     from 'expect';
 import request    from 'supertest';
 import faker      from 'faker';
-import {ObjectID} from 'mongodb';
 
 import {app}      from '../app';
 import {User}     from '../models/user';
 import {users, populateUsers} from './seed/setup';
 
-beforeEach(populateUsers);
 
 describe('POST /users', () => {
+  beforeEach(populateUsers);
+
   it('should create a user', (done) => {
-    var email = faker.internet.email();
-    var password = faker.random.number();
+    let email = faker.internet.email();
+    let password = faker.random.number();
+    let displayName = faker.internet.userName();
 
     request(app)
       .post('/users')
-      .send({email, password})
+      .send({email, password, displayName})
       .expect(200)
       .expect((res) => {
         expect(res.headers['x-auth']).toExist();
@@ -37,9 +38,9 @@ describe('POST /users', () => {
   });
 
   it('should not create user if email in use', (done) => {
-    var email = users[0].email;
-    var password = faker.random.number();
-
+    let email = users[0].email;
+    let password = faker.random.number();
+    let displayName = faker.internet.userName();
     request(app)
       .post('/users')
       .send({email, password})
