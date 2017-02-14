@@ -8,8 +8,8 @@ const isRealString = (str) => {
   return typeof str === 'string' && str.trim().length > 0;
 };
 
-const generateMessage = (from, text) => {
-  return { from, text };
+const generateMessage = (from, msg) => {
+  return { from, msg };
 };
 
 const YouTubeGetID = (url) => {

@@ -32,7 +32,7 @@ MainChatRoomSchema.statics.addChatter = function (videoId, chatter) {
       room.chatters.push(chatter);
 
       return room.save()
-        .then(() => resolve(chatter))
+        .then(resolve)
         .catch(reject);
     })
   })
@@ -43,15 +43,12 @@ MainChatRoomSchema.statics.removeChatter = function (videoId, chatter) {
 
   return new Promise((resolve, reject) => {
     Room.findOne({ videoId }).then((room) => {
-      let out = room.chatters.filter((chat) => chat.id === chatter.id);
+      //let out = room.chatters.filter((chat) => chat.id === chatter.id);
+      console.log('ID~~',room.chatters.id(chatter.id));
+      room.chatters.id(chatter.id).remove();
 
-      if (out.length === 0) {
-        return resolve();
-      }
-
-      room.chatters.id(out[0]._id).remove();
       return room.save()
-        .then(() => resolve(out[0]))
+        .then(resolve)
         .catch(reject);
     });
   })

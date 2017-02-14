@@ -2,8 +2,7 @@ import expect from 'expect';
 import {server} from '../app';
 import {MainChatRoom} from '../models/mainChat';
 import {
-  roomOneChatters,
-  roomTwoChatters,
+  chatters,
   mainChatRooms,
   populateRoom
 } from './seed/socket.setup.js';
@@ -19,8 +18,8 @@ describe('Main Chatroom test', () => {
       anonymous: true
     };
 
-    MainChatRoom.addChatter(mainChatRooms[0].videoId, newChatter).then(() => {
-        MainChatRoom.findOne({ videoId: mainChatRooms[0].videoId }).then((room) => {
+    MainChatRoom.addChatter(mainChatRooms.videoId, newChatter).then(() => {
+        MainChatRoom.findOne({ videoId: mainChatRooms.videoId }).then((room) => {
           expect(room.chatters.length).toBe(4);
           expect(room.chatters[3].id).toEqual('NewChatter');
           done();
@@ -29,8 +28,8 @@ describe('Main Chatroom test', () => {
   });
 
   it('should remove chatter from room', (done) => {
-    MainChatRoom.removeChatter(mainChatRooms[0].videoId, roomOneChatters[0]).then((chatter) => {
-      MainChatRoom.findOne({videoId: mainChatRooms[0].videoId}).then((room) => {
+    MainChatRoom.removeChatter(mainChatRooms.videoId, chatters[0]).then(() => {
+      MainChatRoom.findOne({videoId: mainChatRooms.videoId}).then((room) => {
         expect(room.chatters.length).toBe(2);
         done();
       })

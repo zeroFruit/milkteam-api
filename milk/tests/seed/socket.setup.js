@@ -17,7 +17,7 @@ const CHATTER_FOUR_ID = 'ChatterIdFour';
 const CHATTER_FIVE_ID = 'ChatterIdFive';
 const CHATTER_SIX_ID = 'ChatterIdSix';
 
-const roomOneChatters = [{
+const roomOnechatters = [{
   id: CHATTER_ONE_ID,
   displayName: 'ChatterOne',
   anonymous: true
@@ -47,17 +47,17 @@ const roomTwoChatters = [{
 
 const mainChatRooms = [{
   videoId: 'videoIdOne',
-  chatters: roomOneChatters
+  chatters: roomOnechatters
 }, {
-  videoId: 'videoIdTwo',
+  videoID: 'videoIdTwo',
   chatters: roomTwoChatters
 }];
 
 const populateRoom = (done) => {
   MainChatRoom.remove({}).then(() => {
-    MainChatRoom(mainChatRooms[0]).save().then(() => {
-      MainChatRoom(mainChatRooms[1]).save().then(() => done())
-    }).catch((e) => done(e));
+    MainChatRoom(mainChatRooms).save()
+      .then(() => done())
+      .catch((e) => done(e));
   });
 };
 
@@ -72,7 +72,7 @@ const populateChatters = (done) => {
 module.exports = {
   SOCKET_URL,
   TEST_MAIN_CHAT_KEY,
-  roomOneChatters,
+  roomOnechatters,
   roomTwoChatters,
   mainChatRooms,
   populateRoom,

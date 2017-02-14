@@ -14,9 +14,9 @@ describe('test helpers', () => {
 
   it('is generateMessage', () => {
     let from = 'JooHyung';
-    let text = 'Some text';
-    let message = helper.generateMessage(from, text);
+    let msg = 'Some text';
+    let message = helper.generateMessage(from, msg);
 
-    expect(message).toInclude({from, text});
+    expect(message).toInclude({from, msg});
   });
 });
