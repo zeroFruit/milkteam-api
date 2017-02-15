@@ -29,6 +29,7 @@ MainChatRoomSchema.statics.addChatter = function (videoId, chatter) {
 
   return new Promise((resolve, reject) => {
     Room.findOne({ videoId }).then((room) => {
+      
       room.chatters.push(chatter);
 
       return room.save()

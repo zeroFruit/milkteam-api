@@ -14,7 +14,7 @@ module.exports = (server) => {
   const io = socketIO(server, {path: MAIN_CHAT_URL});
 
   io.on('connection', (socket) => {
-    console.log('New user connected to Main chat');
+    console.log('[Main Chat] New user connected');
     /*
       params: {
         videoId,
@@ -23,12 +23,13 @@ module.exports = (server) => {
         }
       }
     */
-    socket.on('join', (params, callback) => {
+    socket.on('join', (params) => {
+      console.log(params);
+
       let {videoId, user: {token}} = params;
       let chatter = { id: socket.id };
 
       User.findByToken(token).then((user) => {
-
         if (!user) {
           chatter.displayName = faker.internet.userName;
           chatter.anonymous = true;
@@ -41,43 +42,53 @@ module.exports = (server) => {
 
         redisClient.hget(MAIN_CHAT_REDIS_KEY, chatter.id, (err, reply) => {
           if (!reply) {
+            console.log(reply);
             redisClient.hmset(MAIN_CHAT_REDIS_KEY, chatter.id, videoId);
           }
         });
 
-        MainChatRoom.removeChatter(videoId, chatter).then(() => {
+        MainChatRoom.removeChatter(videoId, chatter).then((out) => {
           MainChatRoom.addChatter(videoId, chatter).then((chatter) => {
 
-            socket.emit('newMessage', {msg: `WELCOME MESSAGE TO ${chatter.displayName}`});
-            socket.broadcast.to(videoId).emit('newMessage', {msg: 'NEW USER ALERT MESSAGE'});
+            socket.emit('newMessage', {text: `[Main Chat] WELCOME MESSAGE TO ${chatter.displayName}`});
+            socket.broadcast.to(videoId).emit('newMessage', {text: '[Main Chat] NEW USER ALERT MESSAGE'});
 
-            callback();
+            console.log(`[Main Chat] ${chatter.displayName} Connected`);
           });
         });
       });
     });
-
+    /*
+      message: {
+        text
+      }
+    */
     socket.on('createMessage', (message) => {
+      console.log(message);
+
       redisClient.hget(MAIN_CHAT_REDIS_KEY, socket.id, (err, videoId) => {
         if (!err && videoId && isRealString(message.text)) {
+          console.log('No error!');
           io.to(videoId).emit('newMessage', generateMessage(socket.id, message.text));
         } else {
-          console.log(err);
+          console.log('error', err);
         }
       });
-
-
     });
 
+    /*
+      params: {
+        // emtpy
+      }
+    */
     socket.on('disconnect', (params, callback) => {
       let chatter = { id: socket.id };
       let videoId;
 
-      console.log('User was disconnected');
+      console.log('[Main Chat] User was disconnected');
 
-      redisClient.hget(MAIN_CHAT_REDIS_KEY, chatter.id, (err, reply) => {
-        if (reply) {
-          videoId = reply;
+      redisClient.hget(MAIN_CHAT_REDIS_KEY, chatter.id, (err, videoId) => {
+        if (videoId) {
           redisClient.hdel(MAIN_CHAT_REDIS_KEY, chatter.id);
 
           MainChatRoom.removeChatter(videoId, chatter).then((chatter) => {

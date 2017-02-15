@@ -4,7 +4,7 @@ import _                from 'lodash';
 import {User}           from '../models/user';
 
 async function addUser (req, res) {
-  let body = _.pick(req.body, ['email', 'password']);
+  let body = _.pick(req.body, ['email', 'password', 'displayName']);
   let user = new User(body);
 
   try {
