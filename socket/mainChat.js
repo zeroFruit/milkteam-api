@@ -14,7 +14,7 @@ module.exports = (server) => {
   const io = socketIO(server, {path: MAIN_CHAT_URL});
 
   io.on('connection', (socket) => {
-    console.log('New user connected to Main chat');
+    console.log('[Main Chat] New user connected');
     /*
       params: {
         videoId,
@@ -45,11 +45,11 @@ module.exports = (server) => {
           }
         });
 
-        MainChatRoom.removeChatter(videoId, chatter).then(() => {
+        MainChatRoom.removeChatter(videoId, chatter).then((out) => {
           MainChatRoom.addChatter(videoId, chatter).then((chatter) => {
 
-            socket.emit('newMessage', {msg: `WELCOME MESSAGE TO ${chatter.displayName}`});
-            socket.broadcast.to(videoId).emit('newMessage', {msg: 'NEW USER ALERT MESSAGE'});
+            socket.emit('newMessage', {msg: `[Main Chat] WELCOME MESSAGE TO ${chatter.displayName}`});
+            socket.broadcast.to(videoId).emit('newMessage', {msg: '[Main Chat] NEW USER ALERT MESSAGE'});
 
             callback();
           });
@@ -73,11 +73,10 @@ module.exports = (server) => {
       let chatter = { id: socket.id };
       let videoId;
 
-      console.log('User was disconnected');
+      console.log('[Main Chat] User was disconnected');
 
-      redisClient.hget(MAIN_CHAT_REDIS_KEY, chatter.id, (err, reply) => {
-        if (reply) {
-          videoId = reply;
+      redisClient.hget(MAIN_CHAT_REDIS_KEY, chatter.id, (err, videoId) => {
+        if (videoId) {
           redisClient.hdel(MAIN_CHAT_REDIS_KEY, chatter.id);
 
           MainChatRoom.removeChatter(videoId, chatter).then((chatter) => {
