@@ -65,8 +65,6 @@ module.exports = (server) => {
           console.log(err);
         }
       });
-
-
     });
 
     socket.on('disconnect', (params, callback) => {
