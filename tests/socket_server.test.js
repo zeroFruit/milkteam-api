@@ -16,7 +16,7 @@ import {
 } from './seed/setup';
 import io from 'socket.io-client';
 
-describe('Socket.io', () => {
+describe.skip('Socket.io', () => {
 
 
   beforeEach(populateRoom);

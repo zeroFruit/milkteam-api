@@ -3,6 +3,7 @@ import validator    from 'validator';
 import _            from 'lodash';
 import jwt          from 'jsonwebtoken';
 import bcrypt       from 'bcryptjs';
+import {Schema}     from 'mongoose';
 
 const UserSchema = new mongoose.Schema({
   email: {
@@ -31,8 +32,33 @@ const UserSchema = new mongoose.Schema({
       type: String,
       required: true
     }
+  }],
+  videos: [{
+    type: Schema.Types.ObjectId,
+    ref: 'video'
   }]
 });
+
+UserSchema.methods.uploadVideo = function (video) {
+  let user = this;
+
+  user.videos.push(video);
+  return user.save().then(() => {
+    return video;
+  });
+}
+
+UserSchema.methods.deleteVideo = function (video) {
+  let user = this;
+
+  return new Promise((resolve, reject) => {
+    user.videos = user.videos.filter((videoElt) => videoElt.id !== video.id);
+
+    return user.save()
+      .then(() => resolve(video))
+      .catch((e) => reject(e));
+  })
+}
 
 UserSchema.methods.toJSON = function () {
   let user = this;
