@@ -39,12 +39,29 @@ const UserSchema = new mongoose.Schema({
   }]
 });
 
+UserSchema.statics.getVideos = function (userId) {
+  let User = this;
+
+  return new Promise((resolve, reject) => {
+    User.findById(userId).populate('videos').then((user) => {
+      const mappedVideos = user.videos.map((video) => {
+        return {title: video.title};
+      });
+
+      resolve(mappedVideos);
+    }).catch((e) => reject(e));
+  });
+}
+
 UserSchema.methods.uploadVideo = function (video) {
   let user = this;
 
   user.videos.push(video);
-  return user.save().then(() => {
-    return video;
+
+  return new Promise((resolve, reject) => {
+    return user.save()
+      .then(() => resolve(video))
+      .catch((e) => reject(e));
   });
 }
 

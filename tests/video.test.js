@@ -51,7 +51,7 @@ describe('Model Video test', () => {
   });
 });
 
-describe.only('POST /video', () => {
+describe('POST /video', () => {
   it('should upload a new video', (done) => {
     const body = {
       video: {
@@ -91,7 +91,9 @@ describe.only('POST /video', () => {
         }).catch((e) => done(e));
       });
   });
+});
 
+describe('DELETE /video', () => {
   it('should delete a video', (done) => {
     request(app)
       .delete('/video')
@@ -126,6 +128,39 @@ describe.only('POST /video', () => {
       .set('x-auth', users[0].tokens[0].token)
       .send({videoId: 'FAKE_VIDEO_ID'})
       .expect(400)
+      .end(done);
+  });
+});
+
+describe('GET /video', () => {
+  beforeEach((done) => {
+    const videoSchema = {
+      title: 'newVideo',
+      content: 'newVideoContent',
+      videoId: 'newVideoId',
+      champion: 'newVideoChamp',
+      position: 'newVideoPos',
+      tier: 'newVideoTier',
+      attribute: 'newVideoAttriute'
+    };
+    const video = new Video(videoSchema);
+
+    User.findById(users[0]._id).then((user) => {
+      user.uploadVideo(video).then((video) => {
+        video.upload().then(() => done());
+      });
+    });
+  });
+
+  it('should get user\'s video.', (done) => {
+    request(app)
+      .get('/video')
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.data.length).toBe(1);
+        expect(res.body.data).toInclude({title: 'newVideo'});
+      })
       .end(done);
   });
 });

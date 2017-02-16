@@ -10,7 +10,9 @@ const responseCode = {
   POST_VIDEO_SUCCESS:             7,
   POST_VIDEO_FAIL:                8,
   DELETE_VIDEO_SUCCESS:           9,
-  DELETE_VIDEO_FAIL:              10          
+  DELETE_VIDEO_FAIL:              10,
+  GET_VIDEO_SUCCESS:              11,
+  GET_VIDEO_FAIL:                 12          
 };
 
 module.exports = responseCode;
