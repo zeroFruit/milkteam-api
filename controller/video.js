@@ -4,13 +4,22 @@ import _                from 'lodash';
 import {Video}          from '../models/video';
 import {User}           from '../models/user';
 
+async function getVideos (req, res) {
+  try {
+    let videos = await User.getVideos(req.user._id);
+
+    res.json({code: Code.GET_VIDEO_SUCCESS, data: videos});
+  } catch (e) {
+    responseByCode(res, Code.GET_VIDEO_FAIL, 400);
+  }
+}
+
 async function uploadVideo (req, res) {
   let body = _.pick(req.body, ['video']);
   let video = new Video(body.video);
 
   try {
-    let user = await User.findById(req.user._id);
-    await user.uploadVideo(video);
+    await req.user.uploadVideo(video);
     await video.upload();
 
     res.json({code: Code.POST_VIDEO_SUCCESS, data: video});
@@ -23,8 +32,7 @@ async function deleteVideo (req, res) {
   let videoId = req.body.videoId;
 
   try {
-    let user = await User.findById(req.user._id);
-    await user.deleteVideo(videoId);
+    await req.user.deleteVideo(videoId);
     let video = await Video.delete(videoId);
 
     res.json({code: Code.DELETE_VIDEO_SUCCESS, data: video});
@@ -34,6 +42,7 @@ async function deleteVideo (req, res) {
 }
 
 module.exports = {
+  getVideos,
   uploadVideo,
   deleteVideo
 };
