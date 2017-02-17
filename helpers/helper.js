@@ -1,4 +1,6 @@
+import _      from 'lodash';
 import {User} from '../models/user';
+
 
 const responseByCode = (res, code, status = 200) => {
   res.status(status).json({code});
@@ -25,10 +27,34 @@ const YouTubeGetID = (url) => {
     return ID;
 };
 
+const matchingHelper = (target, videos) => {
+  // const CHAMPION_WEIGHT = 1;
+  // const POSITION_WEIGHT = 1;
+  // const TIER_WEIGHT = 1;
+  console.log('Before match', videos);
+  videos = videos.filter((video) => {
+    let point = 0;
+    if (video.champion === target.champion) point++;
+    if (video.position === target.position) point++;
+    if (video.tier === target.tier) point++;
+
+    if (point >= 2) {
+      video.points = point;
+      return true;
+    } else {
+      return false;
+    }
+  });
+  console.log(videos);
+
+  return _.max(videos, _.property('points'))
+};
+
 
 module.exports = {
   responseByCode,
   isRealString,
   generateMessage,
-  YouTubeGetID
+  YouTubeGetID,
+  matchingHelper
 }

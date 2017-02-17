@@ -1,8 +1,10 @@
+import {server}         from '../app';
 import Code             from '../config/responseCode';
 import {responseByCode} from '../helpers/helper';
 import _                from 'lodash';
 import {Video}          from '../models/video';
 import {User}           from '../models/user';
+import {alarmIO}        from '../socket/alarm';
 
 async function getVideos (req, res) {
   try {
@@ -21,8 +23,11 @@ async function uploadVideo (req, res) {
   try {
     await req.user.uploadVideo(video);
     await video.upload();
+    let enemy = await Video.match(video.videoId);
 
-    res.json({code: Code.POST_VIDEO_SUCCESS, data: video});
+    // alarmIO(server, ...);
+
+    res.json({code: Code.POST_VIDEO_SUCCESS, data: {video, enemy}});
   } catch (e) {
     responseByCode(res, Code.POST_VIDEO_FAIL, 400);
   }

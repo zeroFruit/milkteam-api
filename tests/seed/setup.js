@@ -32,8 +32,12 @@ const users = [{
 
 const videoOneId = new ObjectID();
 const videoTwoId = new ObjectID();
+const videoThreeId = new ObjectID();
+const videoFourId = new ObjectID();
+const videoFiveId = new ObjectID();
 
 const videos = [{
+  // object for matching test : target
   _id: videoOneId,
   title: 'videoOneTitle',
   content: 'videoOneContent',
@@ -51,6 +55,36 @@ const videos = [{
   position: 'videoTwoPos',
   tier: 'videoTwoTier',
   attribute: 'videoTwoAttribute'
+}, {
+  // object for matching test : point under 2
+  _id: videoThreeId,
+  title: 'videoThreeTitle',
+  content: 'videoThreeContent',
+  videoId: 'videoThreeId',
+  champion: 'videoThreeChamp',
+  position: 'videoThreePos',
+  tier: 'videoThreeTier',
+  attribute: 'videoThreeAttribute'
+}, {
+  // object for matching test : point over 2
+  _id: videoFourId,
+  title: 'videoFourTitle',
+  content: 'videoFourContent',
+  videoId: 'videoFourId',
+  champion: 'videoOneChamp', // same
+  position: 'videoOnePos',   // same
+  tier: 'videoFourTier',
+  attribute: 'videoFourAttribute'
+}, {
+  // object for matching test : point over 2
+  _id: videoFiveId,
+  title: 'videoFiveTitle',
+  content: 'videoFiveContent',
+  videoId: 'videoFiveId',
+  champion: 'videoOneChamp', // same
+  position: 'videoOnePos',   // same
+  tier: 'videoOneTier',      // same
+  attribute: 'videoFiveAttribute'
 }];
 
 const populateUsers = (done) => {
@@ -66,8 +100,11 @@ const populateVideos = (done) => {
   Video.remove({}).then(() => {
     let videoOne = new Video(videos[0]).save();
     let videoTwo = new Video(videos[1]).save();
+    let videoThree = new Video(videos[2]).save();
+    let videoFour = new Video(videos[3]).save();
+    let videoFive = new Video(videos[4]).save();
 
-    return Promise.all([videoOne, videoTwo]);
+    return Promise.all([videoOne, videoTwo, videoThree, videoFour, videoFive]);
   }).then(() => done());
 };
 
