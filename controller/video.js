@@ -4,6 +4,7 @@ import {responseByCode} from '../helpers/helper';
 import _                from 'lodash';
 import {Video}          from '../models/video';
 import {User}           from '../models/user';
+import {Match}          from '../models/match';
 import {alarmIO}        from '../socket/alarm';
 
 async function getVideos (req, res) {
@@ -18,17 +19,31 @@ async function getVideos (req, res) {
 
 async function uploadVideo (req, res) {
   let body = _.pick(req.body, ['video']);
+  body.video = _.assign(body.video, {owner: req.user._id});
+
   let video = new Video(body.video);
 
   try {
     await req.user.uploadVideo(video);
     await video.upload();
-    let enemy = await Video.match(video.videoId);
 
-    // alarmIO(server, ...);
+    let enemyVideo = await Video.match(video.videoId);
+
+    if (_.isEmpty(enemyVideo)) {
+      return res.json({code: Code.POST_VIDEO_SUCCESS, data: {video}});
+    }
+
+    let match = new Match({videosId: video.videoId + enemyVideo.videoId});
+    match.videos.push(video);
+    match.videos.push(enemyVideo);
+    await match.save();
+
+    let enemyId = await Video.getOwner(enemyVideo.videoId);
+    //alarmIO(server, video.videoId, req.user._id, enemy.videoId, enemyId);
 
     res.json({code: Code.POST_VIDEO_SUCCESS, data: {video, enemy}});
   } catch (e) {
+    console.log(e);
     responseByCode(res, Code.POST_VIDEO_FAIL, 400);
   }
 }
