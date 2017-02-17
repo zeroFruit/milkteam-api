@@ -1,4 +1,6 @@
+import _      from 'lodash';
 import {User} from '../models/user';
+
 
 const responseByCode = (res, code, status = 200) => {
   res.status(status).json({code});
@@ -25,10 +27,47 @@ const YouTubeGetID = (url) => {
     return ID;
 };
 
+const matchingHelper = (target, videos) => {
+  // const CHAMPION_WEIGHT = 1;
+  // const POSITION_WEIGHT = 1;
+  // const TIER_WEIGHT = 1;
+  if(!target) {
+    return undefined;
+  }
+  videos = videos.filter((video) => {
+    let point = 0;
+    if (video.champion === target.champion) point++;
+    if (video.position === target.position) point++;
+    if (video.tier === target.tier) point++;
+
+    video.points = point;
+
+    if (point >= 2) {
+      return true;
+    } else {
+      return false;
+    }
+  });
+
+  if(videos.length === 0) {
+    return undefined;
+  }
+
+  return _.max(videos, _.property('points'))
+};
+
+/*
+  http 응답시 _id 를 제외한 데이터만 추출해서 object형태로 리턴
+*/
+const generateVideoData = (video) => {
+  return _.pick(video, ['title']);
+}
+
 
 module.exports = {
   responseByCode,
   isRealString,
   generateMessage,
-  YouTubeGetID
+  YouTubeGetID,
+  matchingHelper
 }

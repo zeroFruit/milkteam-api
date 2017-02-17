@@ -4,7 +4,8 @@ import faker      from 'faker';
 
 import {app}      from '../app';
 import {User}     from '../models/user';
-import {users, populateUsers} from './seed/setup';
+import {Video}    from '../models/video';
+import {users, populateUsers, videos, populateVideos} from './seed/setup';
 
 
 describe('POST /users', () => {
@@ -93,4 +94,65 @@ describe('DELETE /users/me/token', () => {
         }).catch((e) => done(e));
       });
   });
-})
+});
+
+describe('User video association test', () => {
+  it('should add new video into the list', (done) => {
+    const videoSchema = {
+      title: 'newVideo',
+      content: 'newVideoContent',
+      videoId: 'newVideoId',
+      champion: 'newVideoChamp',
+      position: 'newVideoPos',
+      tier: 'newVideoTier',
+      attribute: 'newVideoAttriute'
+    };
+    const video = new Video(videoSchema);
+
+    User.findOne({email: users[0].email}).then((user) => {
+      user.uploadVideo(video).then((video) => {
+        video.upload().then((video) => {
+          User.findOne({email: users[0].email}).populate('videos')
+            .then((user) => {
+              expect(user.videos[0]).toInclude(videoSchema);
+
+              done();
+            });
+        }).catch((e) => {
+          console.log(e);
+          done(e);
+        })
+      });
+    })
+  });
+
+  it('should delete video from the list', (done) => {
+    const videoSchema = {
+      title: 'newVideo',
+      content: 'newVideoContent',
+      videoId: 'newVideoId',
+      champion: 'newVideoChamp',
+      position: 'newVideoPos',
+      tier: 'newVideoTier',
+      attribute: 'newVideoAttriute'
+    };
+    const video = new Video(videoSchema);
+
+    User.findOne({email: users[0].email}).then((user) => {
+      user.uploadVideo(video).then((video) => {
+        user.deleteVideo(video).then((video) => {
+          User.findOne({email: users[0].email}).populate('videos')
+            .then((user) => {
+              expect(user.videos.length).toBe(0);
+
+              done();
+            })
+            .catch((e) => {
+              console.log(e);
+              done(e)
+            });
+        })
+      })
+    })
+  });
+});
