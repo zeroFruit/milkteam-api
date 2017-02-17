@@ -12,7 +12,7 @@ import {matchingHelper}       from '../helpers/helper';
 beforeEach(populateUsers);
 beforeEach(populateVideos);
 
-describe.only('Model Video test', () => {
+describe('Model Video test', () => {
   it('should upload new video and return', (done) => {
     const videoSchema = {
       title: 'newVideo',
@@ -42,7 +42,7 @@ describe.only('Model Video test', () => {
       expect(video).toInclude(videos[0]);
 
       Video.find({}).then((videos) => {
-        expect(videos.length).toBe(4);
+        expect(videos.length).toBe(5);
         done();
       })
     }).catch((e) => {
@@ -52,26 +52,40 @@ describe.only('Model Video test', () => {
   });
 
   it('is Video.match success test', (done) => {
-    const videoSchema = {
-      title: 'newVideo',
-      content: 'newVideoContent',
-      videoId: 'newVideoId',
-      champion: 'videoMatchChamp',
-      position: 'videoMatchPos',
-      tier: 'videoMatchTier',
-      attribute: 'newVideoAttriute'
-    };
-    const video = new Video(videoSchema);
-
     Video.match(videos[0].videoId).then((enemy) => {
-      console.log(enemy);
-      done();
+      expect(enemy.videoId).toEqual(videos[4].videoId);
+      Video.find({
+        $or: [{videoId: enemy.videoId}, {videoId: videos[0].videoId}]
+      }).then((videos) => {
+        expect(videos[0].matched).toBe(true);
+        expect(videos[1].matched).toBe(true);
+        done();
+      }).catch((e) => done(e));
     });
   });
 
-  xit('is Video.match fail test', (done) => {
+  it('is Video.match fail test - non target case', (done) => {
+    const notExistVideoId = 'notExistVideoId';
 
+    Video.match(notExistVideoId).then((enemy) => {
+      expect(enemy).toEqual({});
+      done();
+    }).catch((e) => done(e));
   });
+
+  it('is Video.match fail test - videos length is 0', (done) => {
+    Video.match(videos[1].videoId).then((enemy) => {
+      expect(enemy).toEqual({});
+      done();
+    }).catch((e) => done(e));
+  });
+
+  it('is getOwner test', (done) => {
+    Video.getOwner(videos[5].videoId).then((owner) => {
+      expect(owner).toEqual(users[0]._id);
+      done();
+    })
+  })
 });
 
 describe('POST /video', () => {
@@ -95,7 +109,7 @@ describe('POST /video', () => {
       .expect(200)
       .expect((res) => {
         expect(res.body.code).toBe(Code.POST_VIDEO_SUCCESS);
-        expect(res.body.data).toInclude(body.video);
+        expect(res.body.data).toInclude({video: body.video});
       })
       .end((err, res) => {
         if (err) {
@@ -134,7 +148,7 @@ describe('DELETE /video', () => {
         }
 
         Video.find({}).then((videos) => {
-          expect(videos.length).toBe(1);
+          expect(videos.length).toBe(5);
 
           User.findById(users[0]._id).populate('videos').then((user) => {
             expect(user.videos.length).toBe(0);

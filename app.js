@@ -18,10 +18,6 @@ Router(app);
 
 let server = http.Server(app);
 
-// import socketIO       from 'socket.io';
-// const MAIN_CHAT_URL = '/api/socket/main';
-// const ioMainChat = socketIO(server, {path: MAIN_CHAT_URL});
-
 import mainChatSocket from './socket/mainChat';
 mainChatSocket(server);
 //

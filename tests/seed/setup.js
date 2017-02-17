@@ -35,6 +35,7 @@ const videoTwoId = new ObjectID();
 const videoThreeId = new ObjectID();
 const videoFourId = new ObjectID();
 const videoFiveId = new ObjectID();
+const videoSixId = new ObjectID();
 
 const videos = [{
   // object for matching test : target
@@ -85,6 +86,17 @@ const videos = [{
   position: 'videoOnePos',   // same
   tier: 'videoOneTier',      // same
   attribute: 'videoFiveAttribute'
+}, {
+  // object for getOnwer test
+  _id: videoSixId,
+  title: 'videoSixTitle',
+  content: 'videoSixContent',
+  videoId: 'videoSixId',
+  champion: 'videoSixChamp',
+  position: 'videoSixPos',
+  tier: 'videoSixTier',
+  attribute: 'videoSixAttribute',
+  owner: userOneId
 }];
 
 const populateUsers = (done) => {
@@ -103,8 +115,9 @@ const populateVideos = (done) => {
     let videoThree = new Video(videos[2]).save();
     let videoFour = new Video(videos[3]).save();
     let videoFive = new Video(videos[4]).save();
+    let videoSix  = new Video(videos[5]).save();
 
-    return Promise.all([videoOne, videoTwo, videoThree, videoFour, videoFive]);
+    return Promise.all([videoOne, videoTwo, videoThree, videoFour, videoFive, videoSix]);
   }).then(() => done());
 };
 
