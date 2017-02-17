@@ -1,4 +1,5 @@
 import {MainChatRoom} from '../../models/mainChat';
+import {SubChatRoom}  from '../../models/subChat';
 import {users}        from './setup';
 import jwt            from 'jsonwebtoken';
 import {redisClient}  from '../../config/redis';
@@ -53,13 +54,26 @@ const mainChatRooms = [{
   chatters: roomTwoChatters
 }];
 
+const subChatRooms = [{
+  videoId: 'videoIdOne',
+  chatters: roomOneChatters
+}];
+
 const populateRoom = (done) => {
-  MainChatRoom.remove({}).then(() => {
+  let saveMainRoom = MainChatRoom.remove({}).then(() => {
     MainChatRoom(mainChatRooms[0]).save().then(() => {
-      MainChatRoom(mainChatRooms[1]).save().then(() => done())
-    }).catch((e) => done(e));
+      MainChatRoom(mainChatRooms[1]).save();
+    });
   });
+
+  let saveSubRoom = SubChatRoom.remove({}).then(() => {
+    SubChatRoom(subChatRooms[0]).save();
+  })
+
+  Promise.all([saveMainRoom, saveSubRoom]).then(() => done());
 };
+
+
 
 const populateChatters = (done) => {
   redisClient.del(TEST_MAIN_CHAT_KEY, (err, reply) => {
@@ -75,6 +89,7 @@ module.exports = {
   roomOneChatters,
   roomTwoChatters,
   mainChatRooms,
+  subChatRooms,
   populateRoom,
   populateChatters,
   options,
