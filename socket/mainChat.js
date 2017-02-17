@@ -50,7 +50,7 @@ module.exports = (server) => {
 
         MainChatRoom.removeChatter(videoId, chatter).then(() => {
           MainChatRoom.addChatter(videoId, chatter).then((chatter) => {
-            console.log(`${socket.id} || displayName: ${chatter.displayName}`);
+            //console.log(`${socket.id} || displayName: ${chatter.displayName}`);
             socket.emit('newMessage', {msg: `WELCOME MESSAGE TO ${chatter.displayName}`});
             socket.broadcast.to(videoId).emit('newMessage', {msg: 'NEW USER ALERT MESSAGE'});
 

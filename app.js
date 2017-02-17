@@ -13,6 +13,10 @@ const port    = process.env.PORT;
 
 app.use(bodyParser.json());
 
+//Socket 테스트위해 임시허용
+const publicPath = path.join(__dirname, '../public');
+app.use(express.static(publicPath));
+
 import Router from './router/index';
 Router(app);
 
@@ -21,12 +25,24 @@ let server = http.Server(app);
 import mainChatSocket from './socket/mainChat';
 mainChatSocket(server);
 //
-// import subChatSocket from './socket/subChat';
-// subChatSocket.connect(server);
+import subChatSocket from './socket/subChat';
+subChatSocket(server);
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, './public/index.html'));
-})
+  res.sendFile(path.join(__dirname, 'public/index.html'))
+});
+
+app.get('/test', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/index2.html'))
+});
+
+app.get('/sub1', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/sub_index.html'))
+});
+
+app.get('/sub2', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/sub_index2.html'))
+});
 
 server.listen(port, () => {
   console.log(`Connteced to port ${port}`);

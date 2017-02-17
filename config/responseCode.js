@@ -12,7 +12,10 @@ const responseCode = {
   DELETE_VIDEO_SUCCESS:           9,
   DELETE_VIDEO_FAIL:              10,
   GET_VIDEO_SUCCESS:              11,
-  GET_VIDEO_FAIL:                 12          
+  GET_VIDEO_FAIL:                 12,
+
+  GET_CHATS_SUCCESS:              13,
+  GET_CHATS_FAIL:                 14          
 };
 
 module.exports = responseCode;

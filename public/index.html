@@ -2,21 +2,57 @@
 <html>
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   </head>
-  <body class="centered-form">
+  <body>
     <h2>Chat!</h2>
+    <button id="join1">Join Video One</button>
+    <button id="join2">Join Video Two</button>
+    <input type="text" id="chat"/>
+    <button id="send">Send</button>
+    <div class="container" style="margin: 100px;">
+      <div id="left" class="half" style="width: 50%; float:left; border-right: solid 1px black; text-align:center;">
+      </div>
+
+      <!-- <div id="right" class="half" style="width: 50%; margin-left: 50%; text-align:center;">
+        right
+      </div>
+    </div> -->
     <script src="/api/socket/main/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
     <script>
       var ROOT_URL = 'http://ec2-52-78-175-43.ap-northeast-2.compute.amazonaws.com:3000';
       var socket = io.connect(ROOT_URL, {path: '/api/socket/main'});
 
-      // socket.on('connect', function() {
-      //   console.log('connected to server');
-      // });
-      //
-      // socket.on('disconnect', function () {
-      //   console.log('Disconnected from server');
-      // });
+      $('#join1').on('click', function() {
+        var params = {
+          videoId: 'videoId',
+          user: {
+            token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OGE3MjJkMDcyZTgwMTE5NTI5ZWE3OWMiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNDg3MzQ4NDMyfQ.HWuXVIKH1WGioJEIVkX4_K5TPfxYQZQRmRBw463_6-8'
+          }
+        }
+        socket.emit('join', params);
+      });
+
+      $('#join2').on('click', function() {
+        var params = {
+          videoId: 'videoId2',
+          user: {
+            token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI1OGE3MjJkMDcyZTgwMTE5NTI5ZWE3OWMiLCJhY2Nlc3MiOiJhdXRoIiwiaWF0IjoxNDg3MzQ4NDMyfQ.HWuXVIKH1WGioJEIVkX4_K5TPfxYQZQRmRBw463_6-8'
+          }
+        }
+        socket.emit('join', params);
+      });
+
+      socket.on('newMessage', function(message) {
+        console.log(message);
+      });
+
+      $('#send').on('click', function() {
+        var text = $('#chat').val();
+        console.log(text);
+        socket.emit('createMessage', {text: text});
+      });
     </script>
   </body>
 </html>
