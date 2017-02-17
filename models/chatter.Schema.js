@@ -4,13 +4,11 @@ import {Schema} from 'mongoose';
 const ChatterSchema = new Schema({
   id: { // socket id
     type: String,
-    required: true,
-    unique: true
+    required: true
   },
   displayName: {
     type: String,
-    required: true,
-    unique: true
+    required: true
   },
   anonymous: {
     type: Boolean,

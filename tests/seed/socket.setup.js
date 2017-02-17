@@ -56,22 +56,24 @@ const mainChatRooms = [{
 
 const subChatRooms = [{
   videoId: 'videoIdOne',
-  chatters: roomOneChatters
+  chatters: roomOneChatters,
+  lChat: [],
+  rChat: []
 }];
 
 const populateRoom = (done) => {
-  let saveMainRoom = MainChatRoom.remove({}).then(() => {
+  MainChatRoom.remove({}).then(() => {
     MainChatRoom(mainChatRooms[0]).save().then(() => {
-      MainChatRoom(mainChatRooms[1]).save();
+      MainChatRoom(mainChatRooms[1]).save().then(() => done());
     });
   });
-
-  let saveSubRoom = SubChatRoom.remove({}).then(() => {
-    SubChatRoom(subChatRooms[0]).save();
-  })
-
-  Promise.all([saveMainRoom, saveSubRoom]).then(() => done());
 };
+
+const populateSubRoom = (done) => {
+  SubChatRoom.remove({}).then(() => {
+    SubChatRoom(subChatRooms[0]).save().then(() => done());
+  })
+}
 
 
 
@@ -91,6 +93,7 @@ module.exports = {
   mainChatRooms,
   subChatRooms,
   populateRoom,
+  populateSubRoom,
   populateChatters,
   options,
 };
