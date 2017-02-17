@@ -14,7 +14,7 @@ module.exports = (server) => {
   const io = socketIO(server, {path: MAIN_CHAT_URL});
 
   io.on('connection', (socket) => {
-    console.log('New user connected to Main chat');
+    console.log(`${socket.id} connected to Main chat`);
     /*
       params: {
         videoId,
@@ -47,7 +47,7 @@ module.exports = (server) => {
 
         MainChatRoom.removeChatter(videoId, chatter).then(() => {
           MainChatRoom.addChatter(videoId, chatter).then((chatter) => {
-
+            console.log(`${socket.id} || displayName: ${chatter.displayName}`);
             socket.emit('newMessage', {msg: `WELCOME MESSAGE TO ${chatter.displayName}`});
             socket.broadcast.to(videoId).emit('newMessage', {msg: 'NEW USER ALERT MESSAGE'});
 

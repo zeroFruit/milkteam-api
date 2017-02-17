@@ -7,11 +7,12 @@ import {users, populateUsers, videos, populateVideos} from './seed/setup';
 import {uploadVideo}          from '../controller/video';
 import {Video}                from '../models/video';
 import {User}                 from '../models/user';
+import {matchingHelper}       from '../helpers/helper';
 
 beforeEach(populateUsers);
 beforeEach(populateVideos);
 
-describe('Model Video test', () => {
+describe.only('Model Video test', () => {
   it('should upload new video and return', (done) => {
     const videoSchema = {
       title: 'newVideo',
@@ -41,13 +42,35 @@ describe('Model Video test', () => {
       expect(video).toInclude(videos[0]);
 
       Video.find({}).then((videos) => {
-        expect(videos.length).toBe(1);
+        expect(videos.length).toBe(4);
         done();
       })
     }).catch((e) => {
       console.log(e);
       done(e);
     })
+  });
+
+  it('is Video.match success test', (done) => {
+    const videoSchema = {
+      title: 'newVideo',
+      content: 'newVideoContent',
+      videoId: 'newVideoId',
+      champion: 'videoMatchChamp',
+      position: 'videoMatchPos',
+      tier: 'videoMatchTier',
+      attribute: 'newVideoAttriute'
+    };
+    const video = new Video(videoSchema);
+
+    Video.match(videos[0].videoId).then((enemy) => {
+      console.log(enemy);
+      done();
+    });
+  });
+
+  xit('is Video.match fail test', (done) => {
+
   });
 });
 
