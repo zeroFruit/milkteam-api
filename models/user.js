@@ -4,6 +4,7 @@ import _            from 'lodash';
 import jwt          from 'jsonwebtoken';
 import bcrypt       from 'bcryptjs';
 import {Schema}     from 'mongoose';
+import PreferenceSchema from './preference.Schema';
 
 const UserSchema = new mongoose.Schema({
   email: {
@@ -36,7 +37,8 @@ const UserSchema = new mongoose.Schema({
   videos: [{
     type: Schema.Types.ObjectId,
     ref: 'video'
-  }]
+  }],
+  preference: [PreferenceSchema]
 });
 
 UserSchema.statics.getVideos = function (userId) {
@@ -105,6 +107,27 @@ UserSchema.methods.removeToken = function (token) {
     }
   });
 };
+
+UserSchema.statics.checkToken = function (token) {
+  let User = this;
+  let decoded;
+
+  if (!token) {
+    return Promise.resolve();
+  }
+
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    return User.findOne({
+      '_id': decoded._id,
+      'tokens.token': token,
+      'tokens.access': 'auth'
+    });
+  } catch (e) {
+    return Promise.reject();
+  }
+}
 
 UserSchema.statics.findByToken = function (token) {
   let User = this;

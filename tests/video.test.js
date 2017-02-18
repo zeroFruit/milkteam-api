@@ -7,7 +7,7 @@ import {users, populateUsers, videos, populateVideos} from './seed/setup';
 import {uploadVideo}          from '../controller/video';
 import {Video}                from '../models/video';
 import {User}                 from '../models/user';
-import {matchingHelper}       from '../helpers/helper';
+import {matchingHelper, NUMBER_OF_MAIN_VIDEOS}       from '../helpers/helper';
 
 beforeEach(populateUsers);
 beforeEach(populateVideos);
@@ -25,7 +25,7 @@ describe('Model Video test', () => {
     };
     const video = new Video(videoSchema);
     video.upload().then((video) => {
-      expect(video).toInclude(videoSchema);
+      expect(video).toExclude({position: videoSchema.position, tier: videoSchema.tier, attribute: videoSchema.attribute});
 
       Video.findOne({videoId: videoSchema.videoId}).then((video) => {
         expect(video).toInclude(videoSchema);
@@ -39,7 +39,7 @@ describe('Model Video test', () => {
 
   it('should delete video and return', (done) => {
     Video.delete(videos[0].videoId).then((video) => {
-      expect(video).toInclude(videos[0]);
+      expect(video).toExclude({position: videos[0].position, tier: videos[0].tier, attribute: videos[0].attribute});
 
       Video.find({}).then((videos) => {
         expect(videos.length).toBe(5);
@@ -85,7 +85,16 @@ describe('Model Video test', () => {
       expect(owner).toEqual(users[0]._id);
       done();
     })
-  })
+  });
+
+  it('is getVideos test', (done) => {
+    Video.getVideos().then((rVideos) => {
+      expect(rVideos.length).toBe(6);
+      expect(rVideos[0]).toInclude({title: videos[0].title, content: videos[0].content, videoId: videos[0].videoId});
+      expect(rVideos[0]).toExclude({position: videos[0].position});
+      done();
+    }).catch((e) => done(e));
+  });
 });
 
 describe('POST /video', () => {
@@ -139,7 +148,7 @@ describe('DELETE /video', () => {
       .expect(200)
       .expect((res) => {
         expect(res.body.code).toBe(Code.DELETE_VIDEO_SUCCESS);
-        expect(res.body.data).toInclude(videos[0]);
+        expect(res.body.data).toExclude({position: videos[0].position, tier: videos[0].tier, attribute: videos[0].attribute});
       })
       .end((err, res) => {
         if (err) {
@@ -197,6 +206,70 @@ describe('GET /video', () => {
       .expect((res) => {
         expect(res.body.data.length).toBe(1);
         expect(res.body.data).toInclude({title: 'newVideo'});
+      })
+      .end(done);
+  });
+});
+
+describe.only('GET /video/main', () => {
+  it('should get propery mainVideo who has accessToken', (done) => {
+    const preference = {
+      character: 'videoOneChamp',
+      position: 'videoOnePos',
+      tier: 'VideoTwoTier'
+    };
+
+    request(app)
+      .get('/video/main')
+      .set('x-auth', users[0].tokens[0].token)
+      .query(preference)
+      .expect(200)
+      .expect((res) => {
+        let len;
+
+        if (res.body.data.length > NUMBER_OF_MAIN_VIDEOS) {
+          len = NUMBER_OF_MAIN_VIDEOS;
+        } else {
+          len = res.body.data.length;
+        }
+        expect(res.body.code).toBe(Code.GET_VIDEO_SUCCESS);
+        expect(res.body.data[0]).toInclude({title: videos[0].title, content: videos[0].content});
+      })
+      .end((err, res) => {
+        if (err) {
+          console.log(err);
+          done(err);
+        }
+
+        User.findById(users[0]._id).then((user) => {
+          expect(user.preference.length).toBe(1);
+          expect(user.preference[0]).toInclude(preference);
+          done();
+        }).catch((e) => done(e));
+      })
+  });
+
+  it('should get proper mainVideos who has not accessToken', (done) => {
+    const preference = {
+      character: 'videoOneChamp',
+      position: 'videoOnePos',
+      tier: 'VideoTwoTier'
+    };
+
+    request(app)
+      .get('/video/main')
+      .query(preference)
+      .expect(200)
+      .expect((res) => {
+        let len;
+
+        if (res.body.data.length > NUMBER_OF_MAIN_VIDEOS) {
+          len = NUMBER_OF_MAIN_VIDEOS;
+        } else {
+          len = res.body.data.length;
+        }
+        expect(res.body.code).toBe(Code.GET_VIDEO_SUCCESS);
+        expect(res.body.data[0]).toInclude({title: videos[0].title, content: videos[0].content});
       })
       .end(done);
   });
