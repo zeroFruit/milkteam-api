@@ -1,11 +1,25 @@
 import {server}         from '../app';
 import Code             from '../config/responseCode';
-import {responseByCode} from '../helpers/helper';
+import {responseByCode, getMainVideoHelper} from '../helpers/helper';
 import _                from 'lodash';
 import {Video}          from '../models/video';
 import {User}           from '../models/user';
 import {Match}          from '../models/match';
 import {alarmIO}        from '../socket/alarm';
+
+async function getMainVideoByPreference (req, res) {
+  try {
+    let videos = await Video.getVideos();
+    let mainVideos = getMainVideoHelper(req.query, videos);
+
+    //메인 비디오 main 속성 업데이트 추가하기
+
+    res.json({code: Code.GET_VIDEO_SUCCESS, data: mainVideos});
+  } catch (e) {
+    console.log(e);
+    responseByCode(res, Code.GET_VIDEO_FAIL, 400);
+  }
+}
 
 async function getVideos (req, res) {
   try {
@@ -29,7 +43,7 @@ async function uploadVideo (req, res) {
 
     let enemyVideo = await Video.match(video.videoId);
 
-    if (_.isEmpty(enemyVideo)) {
+    if (_.isEmpty(enemyVideo)) { // 기준에 맞는 대결 영상이 없는 경우
       return res.json({code: Code.POST_VIDEO_SUCCESS, data: {video}});
     }
 
@@ -62,6 +76,7 @@ async function deleteVideo (req, res) {
 }
 
 module.exports = {
+  getMainVideoByPreference,
   getVideos,
   uploadVideo,
   deleteVideo

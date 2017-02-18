@@ -1,5 +1,5 @@
 import {mongoose}       from '../config/mongodb';
-import {matchingHelper} from '../helpers/helper';
+import {matchingHelper, generateVideoData} from '../helpers/helper';
 import {Schema}         from 'mongoose';
 
 
@@ -12,9 +12,17 @@ const VideoSchema = new mongoose.Schema({
   tier:       { type: String, required: true },
   attribute:  { type: String, required: true },
   matched:    { type: Boolean, default: false },
-  main:       { type: Boolean, default: false },
+  main:       { type: Number, default: 0 },
   owner:      { type: Schema.Types.ObjectId }
 });
+
+VideoSchema.statics.getVideos = function () {
+  let Video = this;
+
+  return Video.find({}).then((videos) => {
+    return videos.map((video) => generateVideoData(video));
+  });
+}
 
 VideoSchema.statics.getOwner = function (videoId) {
   let Video = this;
@@ -48,7 +56,7 @@ VideoSchema.statics.match = function (videoId) {
           $set: {matched: true}
         }, {
           multi: true
-        }).then(() => resolve(enemy))
+        }).then(() => resolve(generateVideoData(enemy)))
       } else {
         resolve({});
       }
@@ -63,7 +71,7 @@ VideoSchema.methods.upload = function() {
 
   return new Promise((resolve, reject) => {
     return video.save()
-      .then(() => resolve(video))
+      .then(() => resolve(generateVideoData(video)))
       .catch((e) => rejct(e));
   });
 }
@@ -72,9 +80,9 @@ VideoSchema.statics.delete = function(videoId) {
   let Video = this;
 
   return new Promise((resolve, reject) => {
-    Video.findOneAndRemove({ videoId }, null, (err, result) => {
-      if (result) {
-        resolve(result);
+    Video.findOneAndRemove({ videoId }, null, (err, video) => {
+      if (video) {
+        resolve(generateVideoData(video));
       } else {
         reject();
       }

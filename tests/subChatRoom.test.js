@@ -9,7 +9,7 @@ import {
   populateSubRoom
 } from './seed/socket.setup.js';
 
-describe.only('Sub-Chatroom test', () => {
+describe('Sub-Chatroom test', () => {
 
   beforeEach(populateRoom);
   beforeEach(populateSubRoom);
