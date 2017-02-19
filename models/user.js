@@ -41,6 +41,18 @@ const UserSchema = new mongoose.Schema({
   preference: [PreferenceSchema]
 });
 
+UserSchema.methods.updatePreference = function(preference) {
+  let user = this;
+
+  if (user.preference.length === 0) {
+    user.preference.push(preference);
+  } else {
+    user.preference[0].remove();
+    user.preference.push(preference);
+  }
+
+  return user.save();
+}
 UserSchema.statics.getVideos = function (userId) {
   let User = this;
 

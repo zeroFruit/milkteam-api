@@ -148,7 +148,7 @@ describe('POST /video', () => {
   });
 });
 
-describe.only('DELETE /video', () => {
+describe('DELETE /video', () => {
   it('should delete a video', (done) => {
     request(app)
       .delete('/video')
@@ -224,8 +224,8 @@ describe('GET /video', () => {
   });
 });
 
-describe('GET /video/main', () => {
-  it('should get propery mainVideo who has accessToken', (done) => {
+describe.only('GET /video/main', () => {
+  it('should get proper mainVideo who has accessToken', (done) => {
     const preference = {
       character: 'videoOneChamp',
       position: 'videoOnePos',
