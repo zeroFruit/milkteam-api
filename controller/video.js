@@ -1,6 +1,10 @@
 import {server}         from '../app';
 import Code             from '../config/responseCode';
-import {responseByCode, getMainVideoHelper} from '../helpers/helper';
+import {
+  responseByCode,
+  getMainVideoHelper,
+  removeMatchesWithVideoId
+} from '../helpers/helper';
 import _                from 'lodash';
 import {Video}          from '../models/video';
 import {User}           from '../models/user';
@@ -21,6 +25,8 @@ async function getMainVideoByPreference (req, res) {
   }
 }
 
+
+// user 컨트롤러 옮기기
 async function getVideos (req, res) {
   try {
     let videos = await User.getVideos(req.user._id);
@@ -66,12 +72,21 @@ async function deleteVideo (req, res) {
   let videoId = req.body.videoId;
 
   try {
-    await req.user.deleteVideo(videoId);
-    let video = await Video.delete(videoId);
+    //await req.user.deleteVideo(videoId); // 유저의 영상 목록에서 삭제
+    let matches = await Match.find({}).populate('videos'); // Match Collection에서 삭제
+    let videosIds = removeMatchesWithVideoId(matches, videoId);
+    await Match.removeWithVideosIds(videosIds);
+
+    let video = await Video.delete(videoId); // 영상 Collection에서 삭제
 
     res.json({code: Code.DELETE_VIDEO_SUCCESS, data: video});
   } catch (e) {
-    responseByCode(res, Code.DELETE_VIDEO_FAIL, 400);
+    if (e) {
+      console.log(e);
+      responseByCode(res, Code.DELETE_VIDEO_FAIL, 400);
+    } else {
+      responseByCode(res, Code.VIDEO_NOT_FOUND, 400);
+    }
   }
 }
 

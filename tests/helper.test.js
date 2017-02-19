@@ -1,9 +1,16 @@
 import expect from 'expect';
 import helper from '../helpers/helper';
-import {videos, populateVideos} from './seed/setup';
+import {
+  videos,
+  populateVideos,
+  matches,
+  populateMatches
+} from './seed/setup';
 import {Video} from '../models/video';
+import {Match} from '../models/match';
 
 beforeEach(populateVideos);
+beforeEach(populateMatches);
 
 describe('helpers test', () => {
   it('is isRealString', () => {
@@ -45,4 +52,26 @@ describe('helpers test', () => {
       done();
     }).catch((e) => done(e));
   });
+
+  it('is removeMatchesWithVideoId test', (done) => {
+    const videoId = videos[0].videoId;
+
+    Match.find({}).populate('videos').then((matches) => {
+      let videosId = helper.removeMatchesWithVideoId(matches, videoId);
+
+      expect(videosId[0]).toEqual(matches[0].videosId);
+      done();
+    }).catch((e) => done(e));
+  });
+
+  it('is removeMatchesWithVideoId empty test', (done) => {
+    const videoId = 'NotIncluded!';
+
+    Match.find({}).populate('videos').then((matches) => {
+      let videosId = helper.removeMatchesWithVideoId(matches, videoId);
+
+      expect(videosId.length).toBe(0);
+      done();
+    }).catch((e) => done(e));
+  })
 });

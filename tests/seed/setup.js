@@ -3,6 +3,7 @@ import jwt        from 'jsonwebtoken';
 
 import {User}     from '../../models/user';
 import {Video}    from '../../models/video';
+import {Match}    from '../../models/match';
 
 const userOneId = new ObjectID();
 const userTwoId = new ObjectID();
@@ -99,6 +100,11 @@ const videos = [{
   owner: userOneId
 }];
 
+const matches = [{
+  videosId: videos[0].videoId + videos[1].videoId,
+  videos: [videos[0], videos[1]]
+}];
+
 const populateUsers = (done) => {
   User.remove({}).then(() => {
     let userOne = new User(users[0]).save();
@@ -121,4 +127,12 @@ const populateVideos = (done) => {
   }).then(() => done());
 };
 
-module.exports = {users, populateUsers, videos, populateVideos};
+const populateMatches = (done) => {
+  Match.remove({}).then(() => {
+    let matchOne = new Match(matches[0]).save();
+
+    return Promise.all([matchOne]);
+  }).then(() => done());
+};
+
+module.exports = {users, populateUsers, videos, populateVideos, matches, populateMatches};

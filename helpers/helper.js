@@ -83,6 +83,18 @@ const getMainVideoHelper = (preference, videos) => {
   //return _.max(videos, _.property('points'));
 };
 
+const removeMatchesWithVideoId = (matches, videoId) => {
+  matches = matches.filter((match) => {
+    if (match.videos[0].videoId === videoId) return true;
+    if (match.videos[1].videoId === videoId) return true;
+    else return false;
+  });
+
+  return matches.map((match) => {
+    return match.videosId;
+  });
+}
+
 
 module.exports = {
   NUMBER_OF_MAIN_VIDEOS,
@@ -92,5 +104,6 @@ module.exports = {
   YouTubeGetID,
   matchingHelper,
   generateVideoData,
-  getMainVideoHelper
+  getMainVideoHelper,
+  removeMatchesWithVideoId
 }
