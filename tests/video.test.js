@@ -148,7 +148,7 @@ describe('POST /video', () => {
   });
 });
 
-describe('DELETE /video', () => {
+describe.only('DELETE /video', () => {
   it('should delete a video', (done) => {
     request(app)
       .delete('/video')
@@ -173,7 +173,7 @@ describe('DELETE /video', () => {
 
             // 관련 경쟁영상도 삭제되었는지 테스트
             Match.find({}).then((matches) => {
-              expect(matches.length).toBe(0);
+              expect(matches.length).toBe(1);
               done();
             })
           })
@@ -224,7 +224,7 @@ describe('GET /video', () => {
   });
 });
 
-describe.only('GET /video/main', () => {
+describe('GET /video/main', () => {
   it('should get proper mainVideo who has accessToken', (done) => {
     const preference = {
       character: 'videoOneChamp',

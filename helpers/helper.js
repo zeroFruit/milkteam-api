@@ -95,6 +95,15 @@ const removeMatchesWithVideoId = (matches, videoId) => {
   });
 }
 
+const getPercentage = ({lLikes, rLikes}) => {
+  if (lLikes !== 0 && rLikes !== 0) {
+    return _.mapValues({lLikes, rLikes}, (likes) => likes / (lLikes + rLikes));
+  } else if (lLikes === 0) {
+    return {lLikes: 0, rLikes: 1};
+  } else {
+    return {lLikes: 1, rLikes: 0};
+  }
+}
 
 module.exports = {
   NUMBER_OF_MAIN_VIDEOS,
@@ -105,5 +114,6 @@ module.exports = {
   matchingHelper,
   generateVideoData,
   getMainVideoHelper,
-  removeMatchesWithVideoId
+  removeMatchesWithVideoId,
+  getPercentage
 }
