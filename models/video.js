@@ -83,6 +83,8 @@ VideoSchema.statics.delete = function(videoId) {
     Video.findOneAndRemove({ videoId }, null, (err, video) => {
       if (video) {
         resolve(generateVideoData(video));
+      } else if (err) {
+        reject(err);
       } else {
         reject();
       }

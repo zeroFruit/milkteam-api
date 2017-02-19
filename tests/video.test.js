@@ -3,14 +3,23 @@ import request                from 'supertest';
 
 import {app}                  from '../app';
 import Code                   from '../config/responseCode';
-import {users, populateUsers, videos, populateVideos} from './seed/setup';
+import {
+  users,
+  populateUsers,
+  videos,
+  populateVideos,
+  matches,
+  populateMatches
+} from './seed/setup';
 import {uploadVideo}          from '../controller/video';
 import {Video}                from '../models/video';
 import {User}                 from '../models/user';
+import {Match}                from '../models/match';
 import {matchingHelper, NUMBER_OF_MAIN_VIDEOS}       from '../helpers/helper';
 
 beforeEach(populateUsers);
 beforeEach(populateVideos);
+beforeEach(populateMatches);
 
 describe('Model Video test', () => {
   it('should upload new video and return', (done) => {
@@ -139,7 +148,7 @@ describe('POST /video', () => {
   });
 });
 
-describe('DELETE /video', () => {
+describe.only('DELETE /video', () => {
   it('should delete a video', (done) => {
     request(app)
       .delete('/video')
@@ -162,7 +171,11 @@ describe('DELETE /video', () => {
           User.findById(users[0]._id).populate('videos').then((user) => {
             expect(user.videos.length).toBe(0);
 
-            done();
+            // 관련 경쟁영상도 삭제되었는지 테스트
+            Match.find({}).then((matches) => {
+              expect(matches.length).toBe(0);
+              done();
+            })
           })
         }).catch((e) => done(e));
       });
@@ -211,7 +224,7 @@ describe('GET /video', () => {
   });
 });
 
-describe.only('GET /video/main', () => {
+describe('GET /video/main', () => {
   it('should get propery mainVideo who has accessToken', (done) => {
     const preference = {
       character: 'videoOneChamp',

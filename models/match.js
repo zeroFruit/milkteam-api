@@ -24,6 +24,12 @@ const MatchSchema = new mongoose.Schema({
   }]
 });
 
+MatchSchema.statics.removeWithVideosIds = function(videosIds) {
+  let Match = this;
+
+  return Match.remove({videosId: {$in: videosIds}})
+    .catch((e) => Promise.reject(e));
+}
 
 const Match = mongoose.model('match', MatchSchema);
 
