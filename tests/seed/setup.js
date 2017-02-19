@@ -103,6 +103,12 @@ const videos = [{
 const matches = [{
   videosId: videos[0].videoId + videos[1].videoId,
   videos: [videos[0], videos[1]]
+}, {
+  videosId: videos[2].videoId + videos[3].videoId,
+  videos: [videos[2], videos[3]],
+  lLikes: 1,
+  rLikes: 2,
+  views: 3
 }];
 
 const populateUsers = (done) => {
@@ -130,9 +136,10 @@ const populateVideos = (done) => {
 const populateMatches = (done) => {
   Match.remove({}).then(() => {
     let matchOne = new Match(matches[0]).save();
+    let matchTwo = new Match(matches[1]).save();
 
-    return Promise.all([matchOne]);
-  }).then(() => done());
+    return Promise.all([matchOne, matchTwo]).then(() => done());
+  });
 };
 
 module.exports = {users, populateUsers, videos, populateVideos, matches, populateMatches};

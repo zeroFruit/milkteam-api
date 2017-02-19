@@ -7,16 +7,21 @@ const responseCode = {
   DELETE_USER_FAIL:               5,
   AUTHENTICATE_FAIL:              6,
 
-  POST_VIDEO_SUCCESS:             7,
-  POST_VIDEO_FAIL:                8,
-  DELETE_VIDEO_SUCCESS:           9,
-  DELETE_VIDEO_FAIL:              10,
-  GET_VIDEO_SUCCESS:              11,
-  GET_VIDEO_FAIL:                 12,
-  VIDEO_NOT_FOUND:                13,
+  POST_VIDEO_SUCCESS:             10,
+  POST_VIDEO_FAIL:                11,
+  DELETE_VIDEO_SUCCESS:           12,
+  DELETE_VIDEO_FAIL:              13,
+  GET_VIDEO_SUCCESS:              14,
+  GET_VIDEO_FAIL:                 15,
+  VIDEO_NOT_FOUND:                16,
 
-  GET_CHATS_SUCCESS:              14,
-  GET_CHATS_FAIL:                 15
+  GET_CHATS_SUCCESS:              20,
+  GET_CHATS_FAIL:                 21,
+
+  PUT_MATCH_SUCCESS:              30,
+  PUT_MATCH_FAIL:                 31,
+
+  DOCS_NOT_FOUND:                 100
 };
 
 module.exports = responseCode;
