@@ -6,8 +6,10 @@ import {redisClient} from '../config/redis';
 const ALARM_URL = '/api/socket/alarm';
 const ALARM_REDIS_KEY = "alarm";
 
-module.exports = (server, ownerVideoId, ownerId, enemyVideoId, enemyId) => {
+//module.exports = (server, ownerVideoId, ownerId, enemyVideoId, enemyId) => {
+module.exports = (server) => {  
   const io = socketIO(server, {path: ALARM_URL});
 
   // code here
+  return io;
 }

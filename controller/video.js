@@ -6,6 +6,9 @@ import {Video}          from '../models/video';
 import {User}           from '../models/user';
 import {Match}          from '../models/match';
 import {alarmIO}        from '../socket/alarm';
+import {redisClient}    from '../config/redis';
+
+const USER_SOCKETID_MAPPER = 'userSocketIdMapper';
 
 async function getVideos (req, res) {
   try {
@@ -17,34 +20,45 @@ async function getVideos (req, res) {
   }
 }
 
-async function uploadVideo (req, res) {
-  let body = _.pick(req.body, ['video']);
-  body.video = _.assign(body.video, {owner: req.user._id});
+function uploadVideo (io) {
+  return async function(req, res) {
+    let body = _.pick(req.body, ['video']);
+    body.video = _.assign(body.video, {owner: req.user._id});
 
-  let video = new Video(body.video);
+    let video = new Video(body.video);
 
-  try {
-    await req.user.uploadVideo(video);
-    await video.upload();
+    try {
+      await req.user.uploadVideo(video);
+      await video.upload();
 
-    let enemyVideo = await Video.match(video.videoId);
+      let enemyVideo = await Video.match(video.videoId);
 
-    if (_.isEmpty(enemyVideo)) {
-      return res.json({code: Code.POST_VIDEO_SUCCESS, data: {video}});
+      if (_.isEmpty(enemyVideo)) {
+        return res.json({code: Code.POST_VIDEO_SUCCESS, data: {video}});
+      }
+
+      let match = new Match({videosId: video.videoId + enemyVideo.videoId});
+      match.videos.push(video);
+      match.videos.push(enemyVideo);
+      await match.save();
+
+      let enemyId = await Video.getOwner(enemyVideo.videoId);
+      //alarmIO(server, video.videoId, req.user._id, enemy.videoId, enemyId);
+      // mongodb에 user부분에 notify 저장
+      // 알람 푸시
+      redisClient.hget(USER_SOCKETID_MAPPER, enemyId, (err, reply) => {
+        // 현재 접속해 있을때만 push notify
+        if (reply) {
+          io.sockets.socket(reply).emit('videoMatched', {message: '회원님의 매드무비가 대결영상에 올라왔습니다!'});
+        }
+        
+      })
+
+      res.json({code: Code.POST_VIDEO_SUCCESS, data: {video, enemy}});
+    } catch (e) {
+      console.log(e);
+      responseByCode(res, Code.POST_VIDEO_FAIL, 400);
     }
-
-    let match = new Match({videosId: video.videoId + enemyVideo.videoId});
-    match.videos.push(video);
-    match.videos.push(enemyVideo);
-    await match.save();
-
-    let enemyId = await Video.getOwner(enemyVideo.videoId);
-    //alarmIO(server, video.videoId, req.user._id, enemy.videoId, enemyId);
-
-    res.json({code: Code.POST_VIDEO_SUCCESS, data: {video, enemy}});
-  } catch (e) {
-    console.log(e);
-    responseByCode(res, Code.POST_VIDEO_FAIL, 400);
   }
 }
 
