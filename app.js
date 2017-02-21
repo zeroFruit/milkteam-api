@@ -32,17 +32,26 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public/index.html'))
 });
 
-app.get('/test', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/index2.html'))
+app.get('/main1', (req, res) => {
+  console.log('connected');
+  res.sendFile(path.join(__dirname, 'public/socket/index1.html'))
+});
+
+app.get('/main2', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/socket/index2.html'))
 });
 
 app.get('/sub1', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/sub_index.html'))
+  res.sendFile(path.join(__dirname, 'public/socket/sub_index.html'))
 });
 
 app.get('/sub2', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/sub_index2.html'))
+  res.sendFile(path.join(__dirname, 'public/socket/sub_index2.html'))
 });
+
+app.get('/upload_img', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/s3test.html'));
+})
 
 server.listen(port, () => {
   console.log(`Connteced to port ${port}`);

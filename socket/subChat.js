@@ -25,8 +25,8 @@ module.exports = (server) => {
     */
     socket.on('join', (params) => {
       let {lVideoId, rVideoId, user: {token}} = params;
-      let chatter = { id: socket.id };
       let videoId = lVideoId + rVideoId;
+      let chatter = { videoId, id: socket.id };
 
       User.findByToken(token).then((user) => {
         if (!user) {
@@ -37,13 +37,15 @@ module.exports = (server) => {
           chatter.anonymous = false;
         }
 
+        let jsonChatterStr = JSON.stringify({videoId, displayName: chatter.displayName})
 
-        redisClient.hget(SUB_CHAT_REDIS_KEY, chatter.id, (err, reply) => {
+        redisClient.hget(SUB_CHAT_REDIS_KEY, socket.id, (err, reply) => {
           if (!reply) {
-            redisClient.hmset(SUB_CHAT_REDIS_KEY, chatter.id, JSON.stringify({videoId, displayName: chatter.displayName}));
+            redisClient.hmset(SUB_CHAT_REDIS_KEY, socket.id, jsonChatterStr);
             socket.join(videoId);
+
           } else if (JSON.parse(reply).videoId !== videoId) {
-            redisClient.hmset(SUB_CHAT_REDIS_KEY, chatter.id, JSON.stringify({videoId, displayName: chatter.displayName}));
+            redisClient.hmset(SUB_CHAT_REDIS_KEY, socket.id, jsonChatterStr);
             socket.leave(JSON.parse(reply).videoId);
             socket.join(videoId);
           }
@@ -54,10 +56,9 @@ module.exports = (server) => {
             //console.log(`${socket.id} || displayName: ${chatter.displayName}`);
 
             // 왼쪽 채팅 창을 default 로 가정
-            socket.emit('lNewMessage', {msg: `[Sub Chat] WELCOME MESSAGE TO ${chatter.displayName}`});
-            socket.broadcast.to(videoId).emit('lNewMessage', {msg: '[Sub Chat] NEW USER ALERT MESSAGE'});
-
-          })
+            socket.emit('lNewMessage', generateMessage(socket.id, 'Welcome', chatter.displayName));
+            socket.broadcast.to(videoId).emit('lNewMessage', generateMessage(socket.id, 'Alert', chatter.displayName));
+          });
         });
       });
     });
@@ -66,10 +67,11 @@ module.exports = (server) => {
       redisClient.hget(SUB_CHAT_REDIS_KEY, socket.id, (err, jsonStr) => {
         if (!err && jsonStr && isRealString(message.text)) {
           let {videoId, displayName} = JSON.parse(jsonStr);
-          io.to(videoId).emit('lNewMessage', generateMessage(socket.id, message.text));
 
+          io.to(videoId).emit('lNewMessage', generateMessage(socket.id, message.text, displayName));
           // 채팅 저장
           SubChatRoom.addLeftChat(videoId, {displayName, text: message.text});
+
         } else {
           // 에러 핸들링, 실수로 join을 안하고 텍스트 전송시...
           console.log(err);
@@ -81,10 +83,11 @@ module.exports = (server) => {
       redisClient.hget(SUB_CHAT_REDIS_KEY, socket.id, (err, jsonStr) => {
         if(!err && jsonStr && isRealString(message.text)) {
           let {videoId, displayName} = JSON.parse(jsonStr);
-          io.to(videoId).emit('rNewMessage', generateMessage(socket.id, message.text));
 
+          io.to(videoId).emit('rNewMessage', generateMessage(socket.id, message.text));
           // 채팅 저장
           SubChatRoom.addRightChat(videoId, {displayName, text: message.text});
+
         } else {
           console.log(err);
         }

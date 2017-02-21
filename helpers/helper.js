@@ -1,5 +1,6 @@
 import _      from 'lodash';
 import {User} from '../models/user';
+import moment from 'moment-timezone';
 
 
 const responseByCode = (res, code, status = 200) => {
@@ -10,8 +11,13 @@ const isRealString = (str) => {
   return typeof str === 'string' && str.trim().length > 0;
 };
 
-const generateMessage = (from, msg) => {
-  return { from, msg };
+const generateMessage = (from, msg, displayName) => {
+  return {
+    from,
+    msg,
+    displayName,
+    date: moment().tz('Asia/Seoul').format('YYYY-MM-DD HH:mm')
+  };
 };
 
 const YouTubeGetID = (url) => {

@@ -5,7 +5,9 @@ const responseCode = {
   POST_USER_LOGIN_FAIL:           3,
   DELETE_USER_SUCCESS:            4,
   DELETE_USER_FAIL:               5,
-  AUTHENTICATE_FAIL:              6,
+  GET_USER_SUCCESS:               6,
+  GET_USER_FAIL:                  7,
+  AUTHENTICATE_FAIL:              8,
 
   POST_VIDEO_SUCCESS:             10,
   POST_VIDEO_FAIL:                11,

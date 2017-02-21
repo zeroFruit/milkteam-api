@@ -6,7 +6,7 @@ import _              from 'lodash';
 const DEFAULT_GET_CHAT_NUMBER = 100;
 
 const SubChatRoomSchema = new mongoose.Schema({
-  videoId: {
+  videosId: {
     type: String,
     required: true,
     unique: true

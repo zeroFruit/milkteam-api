@@ -8,6 +8,9 @@ const router = (app) => {
   app.post('/users', userController.addUser);
   app.post('/users/login', userController.loginUser);
   app.delete('/users/me/token', authenticate, userController.logoutUser);
+  app.get('/users', authenticate, userController.getUser);
+
+  app.post('/users/profile', userController.uploadProfileImg);
 };
 
 module.exports = router;

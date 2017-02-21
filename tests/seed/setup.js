@@ -4,6 +4,7 @@ import jwt        from 'jsonwebtoken';
 import {User}     from '../../models/user';
 import {Video}    from '../../models/video';
 import {Match}    from '../../models/match';
+import {MainChatRoom} from '../../models/mainChat';
 
 const userOneId = new ObjectID();
 const userTwoId = new ObjectID();
@@ -111,13 +112,17 @@ const matches = [{
   views: 3
 }];
 
+const mainChats = [{
+
+}];
+
 const populateUsers = (done) => {
   User.remove({}).then(() => {
-    let userOne = new User(users[0]).save();
-    let userTwo = new User(users[1]).save();
+    let userOne = new User(users[0]);
+    let userTwo = new User(users[1]);
 
-    return Promise.all([userOne, userTwo]);
-  }).then(() => done());
+    return Promise.all([userOne.save(), userTwo.save()]).then(() => done());
+  });
 };
 
 const populateVideos = (done) => {
@@ -129,8 +134,8 @@ const populateVideos = (done) => {
     let videoFive = new Video(videos[4]).save();
     let videoSix  = new Video(videos[5]).save();
 
-    return Promise.all([videoOne, videoTwo, videoThree, videoFour, videoFive, videoSix]);
-  }).then(() => done());
+    return Promise.all([videoOne, videoTwo, videoThree, videoFour, videoFive, videoSix]).then(() => done());
+  })
 };
 
 const populateMatches = (done) => {
@@ -142,4 +147,18 @@ const populateMatches = (done) => {
   });
 };
 
-module.exports = {users, populateUsers, videos, populateVideos, matches, populateMatches};
+const populateMainChats = (done) => {
+  MainChatRoom.remove({}).then(() => {
+    done();
+  });
+}
+
+module.exports = {
+  users,
+  populateUsers,
+  videos,
+  populateVideos,
+  matches,
+  populateMatches,
+  populateMainChats
+};
