@@ -95,7 +95,7 @@ UserSchema.methods.toJSON = function () {
   let user = this;
   let userObject = user.toObject();
 
-  return _.pick(userObject, ['_id', 'email', 'displayName']);
+  return _.pick(userObject, ['email', 'displayName']);
 };
 
 UserSchema.methods.generateAuthToken = function () {
@@ -168,6 +168,7 @@ UserSchema.statics.findByCredentials = function (email, password) {
 
     return new Promise((resolve, reject) => {
       bcrypt.compare(password, user.password, (err, result) => {
+        console.log(result);
         if (err) {
           reject();
         }

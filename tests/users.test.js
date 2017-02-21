@@ -6,6 +6,7 @@ import {app}      from '../app';
 import {User}     from '../models/user';
 import {Video}    from '../models/video';
 import {users, populateUsers, videos, populateVideos} from './seed/setup';
+import Code from '../config/responseCode';
 
 
 describe('POST /users', () => {
@@ -22,7 +23,7 @@ describe('POST /users', () => {
       .expect(200)
       .expect((res) => {
         expect(res.headers['x-auth']).toExist();
-        expect(res.body.data._id).toExist();
+        expect(res.body.data._id).toNotExist();
         expect(res.body.data.email).toBe(email);
       })
       .end((err) => {
@@ -61,6 +62,8 @@ describe('POST /users/login', () => {
       .expect(200)
       .expect((res) => {
         expect(res.headers['x-auth']).toExist();
+        expect(res.body.data.email).toEqual(users[1].email);
+        expect(res.body.data.displayName).toEqual(users[1].displayName);
       })
       .end((err, res) => {
         if (err) {
@@ -93,6 +96,20 @@ describe('DELETE /users/me/token', () => {
           done();
         }).catch((e) => done(e));
       });
+  });
+});
+
+describe.only('GET /users', () => {
+  it('should get user info', (done) => {
+    request(app)
+      .get('/users')
+      .set('x-auth', users[0].tokens[0].token)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.code).toBe(Code.GET_USER_SUCCESS);
+        expect(res.body.data).toInclude({email: users[0].email, displayName: users[0].displayName});
+      })
+      .end(done);
   });
 });
 

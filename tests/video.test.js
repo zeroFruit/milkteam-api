@@ -9,17 +9,21 @@ import {
   videos,
   populateVideos,
   matches,
-  populateMatches
+  populateMatches,
+  populateMainChats
 } from './seed/setup';
 import {uploadVideo}          from '../controller/video';
 import {Video}                from '../models/video';
 import {User}                 from '../models/user';
 import {Match}                from '../models/match';
+import {MainChatRoom}         from '../models/mainChat';
+import {SubChat}              from '../models/subChat';
 import {matchingHelper, NUMBER_OF_MAIN_VIDEOS}       from '../helpers/helper';
 
 beforeEach(populateUsers);
 beforeEach(populateVideos);
 beforeEach(populateMatches);
+beforeEach(populateMainChats);
 
 describe('Model Video test', () => {
   it('should upload new video and return', (done) => {
@@ -39,11 +43,8 @@ describe('Model Video test', () => {
       Video.findOne({videoId: videoSchema.videoId}).then((video) => {
         expect(video).toInclude(videoSchema);
         done();
-      });
-    }).catch((e) => {
-      console.log(e);
-      done(e);
-    })
+      }).catch((e) => done(e));
+    });
   });
 
   it('should delete video and return', (done) => {
@@ -106,7 +107,7 @@ describe('Model Video test', () => {
   });
 });
 
-describe('POST /video', () => {
+describe.only('POST /video', () => {
   it('should upload a new video', (done) => {
     const body = {
       video: {
@@ -119,7 +120,6 @@ describe('POST /video', () => {
         attribute: 'newVideoAttriute'
       }
     };
-
     request(app)
       .post('/video')
       .set('x-auth', users[0].tokens[0].token)
@@ -127,7 +127,7 @@ describe('POST /video', () => {
       .expect(200)
       .expect((res) => {
         expect(res.body.code).toBe(Code.POST_VIDEO_SUCCESS);
-        expect(res.body.data).toInclude({video: body.video});
+        expect(res.body.data).toExclude({position: body.video.position, tier: body.video.tier, attribute: body.video.attribute});
       })
       .end((err, res) => {
         if (err) {
@@ -140,15 +140,17 @@ describe('POST /video', () => {
 
           User.findById(users[0]._id).populate('videos').then((user) => {
             expect(user.videos[0]).toInclude(body.video);
-
-            done();
+            MainChatRoom.findOne({videoId: body.video.videoId}).then((chatroom) => {
+              expect(chatroom).toExist();
+              done();
+            })
           })
         }).catch((e) => done(e));
       });
   });
 });
 
-describe.only('DELETE /video', () => {
+describe('DELETE /video', () => {
   it('should delete a video', (done) => {
     request(app)
       .delete('/video')

@@ -9,6 +9,7 @@ import _                from 'lodash';
 import {Video}          from '../models/video';
 import {User}           from '../models/user';
 import {Match}          from '../models/match';
+import {MainChatRoom}       from '../models/mainChat';
 import {alarmIO}        from '../socket/alarm';
 
 async function getMainVideoByPreference (req, res) {
@@ -42,10 +43,13 @@ async function uploadVideo (req, res) {
   body.video = _.assign(body.video, {owner: req.user._id});
 
   let video = new Video(body.video);
+  let mainChat = new MainChatRoom({videoId: body.video.videoId});
+  // 메인화면 채팅창 등록하기
 
   try {
     await req.user.uploadVideo(video);
-    await video.upload();
+    video = await video.upload();
+    await mainChat.save();
 
     let enemyVideo = await Video.match(video.videoId);
 
@@ -76,6 +80,9 @@ async function deleteVideo (req, res) {
     let matches = await Match.find({}).populate('videos'); // Match Collection에서 삭제
     let videosIds = removeMatchesWithVideoId(matches, videoId);
     await Match.removeWithVideosIds(videosIds);
+
+    // 메인화면 채팅 삭제
+    await MainChatRoom.remove({ videoId });
 
     let video = await Video.delete(videoId); // 영상 Collection에서 삭제
 

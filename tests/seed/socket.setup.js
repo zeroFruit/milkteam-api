@@ -55,7 +55,7 @@ const mainChatRooms = [{
 }];
 
 const subChatRooms = [{
-  videoId: 'videoIdOne',
+  videosId: 'videoIdOne',
   chatters: roomOneChatters,
   lChat: [],
   rChat: []
