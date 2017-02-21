@@ -17,6 +17,13 @@ app.use(bodyParser.json());
 const publicPath = path.join(__dirname, '../public');
 app.use(express.static(publicPath));
 
+// for cross domain origin problem
+app.all('/', function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  next();
+ });
+
 import Router from './router/index';
 Router(app);
 
