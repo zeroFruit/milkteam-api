@@ -64,7 +64,7 @@ VideoSchema.methods.upload = function() {
   return new Promise((resolve, reject) => {
     return video.save()
       .then(() => resolve(video))
-      .catch((e) => rejct(e));
+      .catch((e) => reject(e));
   });
 }
 

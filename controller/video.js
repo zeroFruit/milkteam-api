@@ -40,8 +40,9 @@ async function uploadVideo (req, res) {
 
     let enemyId = await Video.getOwner(enemyVideo.videoId);
     //alarmIO(server, video.videoId, req.user._id, enemy.videoId, enemyId);
+    User.addAlarm(enemyId);
 
-    res.json({code: Code.POST_VIDEO_SUCCESS, data: {video, enemy}});
+    res.json({code: Code.POST_VIDEO_SUCCESS, data: {video, enemyVideo}});
   } catch (e) {
     console.log(e);
     responseByCode(res, Code.POST_VIDEO_FAIL, 400);

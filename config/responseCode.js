@@ -15,7 +15,10 @@ const responseCode = {
   GET_VIDEO_FAIL:                 12,
 
   GET_CHATS_SUCCESS:              13,
-  GET_CHATS_FAIL:                 14          
+  GET_CHATS_FAIL:                 14,
+
+  GET_ALARMS_SUCCESS:             15,
+  GET_ALARMS_FAIL:                16    
 };
 
 module.exports = responseCode;
