@@ -11,11 +11,12 @@ const VideoSchema = new mongoose.Schema({
   position:   { type: String, required: true },
   tier:       { type: String, required: true },
   attribute:  { type: String, required: true },
-  matched:    { type: Boolean, default: false },
-  main:       { type: Number, default: 0 },
+  matched:    { type: Boolean, default: false },  // 현재 매칭된 영상이있는지
+  views:      { type: Number, default: 0 },
   owner:      { type: Schema.Types.ObjectId },
-  match:      { type: Schema.Types.ObjectId },
-  thumbnail:  { type: String }
+  match:      { type: Schema.Types.ObjectId, ref: 'match' },
+  thumbnail:  { type: String },
+
 });
 
 VideoSchema.statics.updateBothMatchProperty = function (videoDocId, enemyVideoDocId, matchDocId) {
@@ -26,6 +27,16 @@ VideoSchema.statics.updateBothMatchProperty = function (videoDocId, enemyVideoDo
     { $set: { match: matchDocId } },
     { multi: true }
   );
+}
+
+VideoSchema.statics.getMatchIds = function (videosId) {
+  let Video = this;
+
+  Video.find({_id: { $in: videosId } }).then((videos) => {
+    return videos.map((video) => {
+      return { match: video.match };
+    })
+  })
 }
 
 VideoSchema.statics.getVideos = function () {

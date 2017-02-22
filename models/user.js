@@ -78,16 +78,56 @@ UserSchema.methods.updatePreference = function(preference) {
 
   return user.save();
 }
+
 UserSchema.statics.getVideos = function (userId) {
   let User = this;
 
   return new Promise((resolve, reject) => {
-    User.findById(userId).populate('videos').then((user) => {
-      const mappedVideos = user.videos.map((video) => {
-        return {title: video.title, id: video.videoId};
-      });
+    User.findById(userId).populate({
+      path: 'videos',
+      populate: {
+        path: 'match',
+        model: 'match',
+        populate: {
+          path: 'videos',
+          model: 'video'
+        }
+      }
+    }).then((user) => {
+      let returnVideosArr = user.videos.map((video) => {
+        if (video.matched === true) {
+          if (video.match.videos[0]._id === video._id) {
+            return {
+              title: video.title,
+              id: video.videoId,
+              _id: video._id,
+              thumbnail: video.thumbnail,
+              viewed: video.match.views,
+              likes: video.match.lLikes // 왼쪽 영상의 좋아요 수
+            };
+          } else {
+            return {
+              title: video.title,
+              id: video.videoId,
+              _id: video._id,
+              thumbnail: video.thumbnail,
+              viewed: video.match.views,
+              likes: video.match.rLikes // 오른쪽 영상의 좋아요 수
+            };
+          }
+        } else {
+          return {
+            title: video.title,
+            id: video.videoId,
+            _id: video._id,
+            thumbnail: video.thumbnail,
+            viewed: video.views,
+            likes: 0 // 메인 영상일 때 좋아요 수
+          };
+        }
 
-      resolve(mappedVideos);
+      });
+      resolve(returnVideosArr);
     }).catch((e) => reject(e));
   });
 }

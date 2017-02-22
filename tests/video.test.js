@@ -237,7 +237,71 @@ describe('GET /video', () => {
       .expect(200)
       .expect((res) => {
         expect(res.body.data.length).toBe(1);
-        expect(res.body.data).toInclude({title: 'newVideo'});
+        expect(res.body.data[0]).toInclude({title: 'newVideo'});
+      })
+      .end(done);
+  });
+});
+
+describe('GET /video/main', () => {
+  it('should get proper mainVideo who has accessToken', (done) => {
+    const preference = {
+      character: 'videoOneChamp',
+      position: 'videoOnePos',
+      tier: 'VideoTwoTier'
+    };
+
+    request(app)
+      .get('/video/main')
+      .set('x-auth', users[0].tokens[0].token)
+      .query(preference)
+      .expect(200)
+      .expect((res) => {
+        let len;
+
+        if (res.body.data.length > NUMBER_OF_MAIN_VIDEOS) {
+          len = NUMBER_OF_MAIN_VIDEOS;
+        } else {
+          len = res.body.data.length;
+        }
+        expect(res.body.code).toBe(Code.GET_VIDEO_SUCCESS);
+        expect(res.body.data[0]).toInclude({title: videos[0].title, content: videos[0].content});
+      })
+      .end((err, res) => {
+        if (err) {
+          console.log(err);
+          done(err);
+        }
+
+        User.findById(users[0]._id).then((user) => {
+          expect(user.preference.length).toBe(1);
+          expect(user.preference[0]).toInclude(preference);
+          done();
+        }).catch((e) => done(e));
+      })
+  });
+
+  it('should get proper mainVideos who has not accessToken', (done) => {
+    const preference = {
+      character: 'videoOneChamp',
+      position: 'videoOnePos',
+      tier: 'VideoTwoTier'
+    };
+
+    request(app)
+      .get('/video/main')
+      .query(preference)
+      .expect(200)
+      .expect((res) => {
+        let len;
+
+        if (res.body.data.length > NUMBER_OF_MAIN_VIDEOS) {
+          len = NUMBER_OF_MAIN_VIDEOS;
+        } else {
+          len = res.body.data.length;
+        }
+        expect(res.body.code).toBe(Code.GET_VIDEO_SUCCESS);
+        expect(res.body.data[0]).toInclude({title: videos[0].title, content: videos[0].content});
       })
       .end(done);
   });

@@ -9,8 +9,8 @@ const router = (app) => {
   app.post('/users/login', userController.loginUser);
   app.delete('/users/me/token', authenticate, userController.logoutUser);
   app.get('/users', authenticate, userController.getUser);
-  app.get('/users/displayname', userController.displayNameDoubleCheck);
-  app.put('/users/displayname', userController.updateDisplayName);
+  app.get('/users/displayname/doublecheck', authenticate, userController.displayNameDoubleCheck);
+  app.put('/users/displayname', authenticate, userController.updateDisplayName);
 
   app.post('/users/profile', authenticate, userController.uploadProfileImg);
 };

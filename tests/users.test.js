@@ -5,6 +5,7 @@ import faker      from 'faker';
 import {app}      from '../app';
 import {User}     from '../models/user';
 import {Video}    from '../models/video';
+import {Match}    from '../models/match';
 import {users, populateUsers, videos, populateVideos} from './seed/setup';
 import Code from '../config/responseCode';
 
@@ -175,7 +176,8 @@ describe('User video association test', () => {
 });
 
 describe('updateProfile test', () => {
-  xit('should successfully update profile sub-doc', (done) => {
+  it('should successfully update profile sub-doc', (done) => {
+
     const profile = {
       originalName: 'profileName',
       tag: 'profileTag',
@@ -214,11 +216,86 @@ describe('updateProfile test', () => {
   })
 });
 
+describe('GET /users/displayname/doublecheck', () => {
+  it('should respond fail', (done) => {
+    request(app)
+      .get('/users/displayname/doublecheck')
+      .set('x-auth', users[0].tokens[0].token)
+      .query({displayName: users[0].displayName})
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.code).toBe(Code.GET_USER_SUCCESS);
+        expect(res.body.data).toBe('fail');
+      })
+      .end(done);
+  });
 
-describe('GET /users/displayname', () => {
-
+  it('should respond success', (done) => {
+    request(app)
+      .get('/users/displayname/doublecheck')
+      .set('x-auth', users[0].tokens[0].token)
+      .query({displayName: 'totalDifferentDisplayName'})
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.code).toBe(Code.GET_USER_SUCCESS);
+        expect(res.body.data).toBe('success');
+      })
+      .end(done);
+  })
 });
 
 describe('PUT /users/displayname', () => {
+  it('should update displayname', (done) => {
+    const newDisplayName = { displayName: 'updatedDisplayName' };
 
+    request(app)
+      .put('/users/displayname')
+      .set('x-auth', users[0].tokens[0].token)
+      .send(newDisplayName)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.code).toBe(Code.PUT_USER_SUCCESS);
+        expect(res.body.data).toBe(newDisplayName.displayName);
+      })
+      .end((err, res) => {
+        if (err) {
+          console.log(err);
+          done(err)
+        }
+
+        User.findById(users[0]._id).then((user) => {
+          expect(user.displayName).toEqual(newDisplayName.displayName);
+          done();
+        }).catch((e) => done());
+      })
+  });
+});
+
+describe('User Model test', () => {
+  it('is getVideos test', (done) => {
+    let userTest = new User({email: 'getVideosTest@example.com', password: 'getVideosTest', displayName: 'getVideosTest'});
+    let videoTest = new Video({
+      videoId: 'getVideosTest',
+      title: 'getVideosTest',
+      content: 'getVideosTest',
+      champion: 'getVideosTest',
+      position: 'getVideosTest',
+      tier: 'getVideosTest',
+      attribute: 'getVideosTest',
+      title: 'getVideosTest'
+    });
+    let matchTest = new Match({videosId: 'getVideosTest'});
+
+    userTest.videos.push(videoTest);
+    videoTest.match = matchTest;
+
+    Promise.all([userTest.save(), videoTest.save(), matchTest.save()]).then(() => {
+      User.getVideos(userTest._id)
+        .then(() => done())
+        .catch((e) => {
+          console.log(e);
+          done(e);
+        })
+    })
+  })
 });

@@ -38,6 +38,7 @@ async function getVideos (req, res) {
 
     res.json({code: Code.GET_VIDEO_SUCCESS, data: videos});
   } catch (e) {
+    console.log(e);
     responseByCode(res, Code.GET_VIDEO_FAIL, 400);
   }
 }

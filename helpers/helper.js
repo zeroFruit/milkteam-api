@@ -111,6 +111,14 @@ const getPercentage = ({lLikes, rLikes}) => {
   }
 }
 
+
+const PER_PAGE = 5;
+
+const getPaginatedItems = (items, page = 1) => {
+
+}
+
+
 module.exports = {
   NUMBER_OF_MAIN_VIDEOS,
   responseByCode,

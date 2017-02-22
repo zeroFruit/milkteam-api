@@ -20,13 +20,15 @@ async function updateDisplayName (req, res) {
 
 async function displayNameDoubleCheck (req, res) {
   try {
-    let user = await User.findOne({displayName: req.user.displayName});
+    let user = await User.findOne({displayName: req.query.displayName});
 
     if (user) {
-      res.json({code: Code.GET_USER_SUCCESS, data: 'fail'});
+      return res.json({code: Code.GET_USER_SUCCESS, data: 'fail'});
     }
+
     res.json({code: Code.GET_USER_SUCCESS, data: 'success'});
   } catch (e) {
+    console.log(e);
     responseByCode(res, Code.GET_USER_FAIL, 400);
   }
 }
