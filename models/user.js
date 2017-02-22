@@ -125,6 +125,7 @@ UserSchema.statics.getVideos = function (userId) {
             likes: 0 // 메인 영상일 때 좋아요 수
           };
         }
+
       });
       resolve(returnVideosArr);
     }).catch((e) => reject(e));
@@ -232,6 +233,7 @@ UserSchema.statics.findByCredentials = function (email, password) {
 
     return new Promise((resolve, reject) => {
       bcrypt.compare(password, user.password, (err, result) => {
+        console.log(result);
         if (err) {
           reject();
         }

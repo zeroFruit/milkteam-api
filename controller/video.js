@@ -33,7 +33,8 @@ async function getMainVideoByPreference (req, res) {
 // user 컨트롤러 옮기기
 async function getVideos (req, res) {
   try {
-    let videos = await User.getVideos(req.user._id);
+    let videos = await User.getVideos(req.user._id); // [{title, id}, ...]
+    //let likesAndViews = await Match.getLikesAndViewFromVideoId()
 
     res.json({code: Code.GET_VIDEO_SUCCESS, data: videos});
   } catch (e) {

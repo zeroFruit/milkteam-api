@@ -177,6 +177,7 @@ describe('User video association test', () => {
 
 describe('updateProfile test', () => {
   it('should successfully update profile sub-doc', (done) => {
+
     const profile = {
       originalName: 'profileName',
       tag: 'profileTag',
@@ -214,7 +215,6 @@ describe('updateProfile test', () => {
     }).catch((e) => done(e));
   })
 });
-
 
 describe('GET /users/displayname/doublecheck', () => {
   it('should respond fail', (done) => {

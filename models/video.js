@@ -16,6 +16,7 @@ const VideoSchema = new mongoose.Schema({
   owner:      { type: Schema.Types.ObjectId },
   match:      { type: Schema.Types.ObjectId, ref: 'match' },
   thumbnail:  { type: String },
+
 });
 
 VideoSchema.statics.updateBothMatchProperty = function (videoDocId, enemyVideoDocId, matchDocId) {
