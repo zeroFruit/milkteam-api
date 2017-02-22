@@ -99,7 +99,7 @@ describe('DELETE /users/me/token', () => {
   });
 });
 
-describe.only('GET /users', () => {
+describe('GET /users', () => {
   it('should get user info', (done) => {
     request(app)
       .get('/users')
@@ -172,4 +172,53 @@ describe('User video association test', () => {
       })
     })
   });
+});
+
+describe('updateProfile test', () => {
+  xit('should successfully update profile sub-doc', (done) => {
+    const profile = {
+      originalName: 'profileName',
+      tag: 'profileTag',
+      link: 'profileLink'
+    };
+
+    User.updateProfile(users[0]._id, profile).then(() => {
+      User.findById(users[0]._id).then((user) => {
+        expect(user.profile[0]).toInclude(profile);
+        done();
+      }).catch((e) => done(e));
+    });
+  });
+
+  it('should successfully update profile when there is already profile image', (done) => {
+    const profile1 = {
+      originalName: 'profileName1',
+      tag: 'profileTag1',
+      link: 'profileLink1'
+    };
+    const profile2 = {
+      originalName: 'profileName2',
+      tag: 'profileTag2',
+      link: 'profileLink2'
+    };
+
+    User.updateProfile(users[0]._id, profile1).then(() => {
+      User.updateProfile(users[0]._id, profile2).then(() => {
+        User.findById(users[0]._id).then((user) => {
+          expect(user.profile.length).toBe(1);
+          expect(user.profile[0]).toInclude(profile2);
+          done();
+        })
+      })
+    }).catch((e) => done(e));
+  })
+});
+
+
+describe('GET /users/displayname', () => {
+
+});
+
+describe('PUT /users/displayname', () => {
+
 });

@@ -5,6 +5,7 @@ import jwt          from 'jsonwebtoken';
 import bcrypt       from 'bcryptjs';
 import {Schema}     from 'mongoose';
 import PreferenceSchema from './preference.Schema';
+import ProfileSchema from './profile.Schema';
 
 const UserSchema = new mongoose.Schema({
   email: {
@@ -38,8 +39,32 @@ const UserSchema = new mongoose.Schema({
     type: Schema.Types.ObjectId,
     ref: 'video'
   }],
-  preference: [PreferenceSchema]
+  preference: [PreferenceSchema],
+  profile: [ProfileSchema]
 });
+
+UserSchema.statics.getProfileLink = function (userId) {
+  let User = this;
+
+  return User.findById(userId).then((user) => {
+    return user.profile[0].link;
+  });
+}
+
+UserSchema.statics.updateProfile = function (userId, profile) {
+  let User = this;
+
+  return User.findById(userId).then((user) => {
+    if (user.profile.length !== 0) {
+      user.profile[0].remove();
+      user.profile.push(profile);
+    } else {
+      user.profile.push(profile);
+    }
+
+    return user.save();
+  });
+}
 
 UserSchema.methods.updatePreference = function(preference) {
   let user = this;
@@ -59,7 +84,7 @@ UserSchema.statics.getVideos = function (userId) {
   return new Promise((resolve, reject) => {
     User.findById(userId).populate('videos').then((user) => {
       const mappedVideos = user.videos.map((video) => {
-        return {title: video.title};
+        return {title: video.title, id: video.videoId};
       });
 
       resolve(mappedVideos);

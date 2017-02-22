@@ -3,13 +3,16 @@ import Code             from '../config/responseCode';
 import {
   responseByCode,
   getMainVideoHelper,
-  removeMatchesWithVideoId
+  removeMatchesWithVideoId,
+  generateVideoData
 } from '../helpers/helper';
+import {getThumbnailFromId} from '../helpers/youtubeHelper';
 import _                from 'lodash';
 import {Video}          from '../models/video';
 import {User}           from '../models/user';
 import {Match}          from '../models/match';
-import {MainChatRoom}       from '../models/mainChat';
+import {MainChatRoom}   from '../models/mainChat';
+import {SubChatRoom}    from '../models/subChat';
 import {alarmIO}        from '../socket/alarm';
 
 async function getMainVideoByPreference (req, res) {
@@ -30,7 +33,8 @@ async function getMainVideoByPreference (req, res) {
 // user 컨트롤러 옮기기
 async function getVideos (req, res) {
   try {
-    let videos = await User.getVideos(req.user._id);
+    let videos = await User.getVideos(req.user._id); // [{title, id}, ...]
+    //let likesAndViews = await Match.getLikesAndViewFromVideoId()
 
     res.json({code: Code.GET_VIDEO_SUCCESS, data: videos});
   } catch (e) {
@@ -38,9 +42,18 @@ async function getVideos (req, res) {
   }
 }
 
+/*
+  1. 영상 업로드
+  2. 메인화면 채팅 모델 생성
+
+*/
 async function uploadVideo (req, res) {
   let body = _.pick(req.body, ['video']);
-  body.video = _.assign(body.video, {owner: req.user._id});
+
+  // 썸네일 링크 가져오기
+  let thumbnail = await getThumbnailFromId(body.video.videoId);
+
+  body.video = _.assign(body.video, { owner: req.user._id, thumbnail });
 
   let video = new Video(body.video);
   let mainChat = new MainChatRoom({videoId: body.video.videoId});
@@ -57,15 +70,25 @@ async function uploadVideo (req, res) {
       return res.json({code: Code.POST_VIDEO_SUCCESS, data: {video}});
     }
 
-    let match = new Match({videosId: video.videoId + enemyVideo.videoId});
-    match.videos.push(video);
-    match.videos.push(enemyVideo);
-    await match.save();
+    let match = new Match({
+      videosId: video.videoId + enemyVideo.videoId,
+      videos: [video, enemyVideo]
+    });
 
+    await match.save();
+    await Video.updateBothMatchProperty(video._id, enemyVideo._id, match._id); // 두 비디오의 match 에 id 업데이트.
+    let subChat = new SubChatRoom({ videosId: video.videoId + enemyVideo.videoId });
+    await subChat.save();
     let enemyId = await Video.getOwner(enemyVideo.videoId);
     //alarmIO(server, video.videoId, req.user._id, enemy.videoId, enemyId);
 
-    res.json({code: Code.POST_VIDEO_SUCCESS, data: {video, enemy}});
+    res.json({
+      code: Code.POST_VIDEO_SUCCESS,
+      data: {
+        video: generateVideoData(video),
+        enemyVideo: generateVideoData(enemyVideo)
+      }
+    });
   } catch (e) {
     console.log(e);
     responseByCode(res, Code.POST_VIDEO_FAIL, 400);

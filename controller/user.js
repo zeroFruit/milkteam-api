@@ -8,22 +8,59 @@ import {User}           from '../models/user';
 
 const FILE_FORM_NAME = 'userfile';
 
+async function updateDisplayName (req, res) {
+  try {
+    await User.update({ _id: req.user._id }, { $set: { displayName: req.body.displayName } });
+
+    res.json({code: Code.PUT_USER_SUCCESS, data: req.body.displayName});
+  } catch (e) {
+    responseByCode(res, Code.PUT_USER_FAIL, 400);
+  }
+}
+
+async function displayNameDoubleCheck (req, res) {
+  try {
+    let user = await User.findOne({displayName: req.user.displayName});
+
+    if (user) {
+      res.json({code: Code.GET_USER_SUCCESS, data: 'fail'});
+    }
+    res.json({code: Code.GET_USER_SUCCESS, data: 'success'});
+  } catch (e) {
+    responseByCode(res, Code.GET_USER_FAIL, 400);
+  }
+}
+
 async function uploadProfileImg (req, res) {
   const form = new formidable.IncomingForm();
 
   try {
     form.parse(req, (err, fields, files) => {
-      uploadImg(files[FILE_FORM_NAME].name, files[FILE_FORM_NAME].path, (err, data) => {
-        if (err) throw err;
+      const {name, path} = files[FILE_FORM_NAME];
 
-        res.json({data: 'success'});
+      uploadImg(req.user._id, name, path, (err, data) => {
+        if (err) {
+          throw err;
+        }
+
+        // user 모델 업데이트
+        const profile = { originalName: name, tag: data.Etag, link: data.Link };
+        User.updateProfile(req.user._id, profile).then(() => {
+          res.json({
+            code: Code.POST_USER_SUCCESS,
+            data: { tag: data.Etag, link: data.Link }
+          });
+        });
       });
     })
   } catch (e) {
     console.log(e);
-    responseByCode(res, Code.POST_USER_FAIL, 400);
+    responseByCode(res, Code.S3_ERROR, 400);
   }
+}
 
+async function removeUser (req, res) {
+  // 회원 탈퇴
 }
 
 async function addUser (req, res) {
@@ -78,6 +115,8 @@ async function getUser (req, res) {
 }
 
 module.exports = {
+  updateDisplayName,
+  displayNameDoubleCheck,
   uploadProfileImg,
   addUser,
   loginUser,

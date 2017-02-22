@@ -27,6 +27,23 @@ const MatchSchema = new mongoose.Schema({
 const LEFT_LIKES = -1;
 const RIGHT_LIKES = 1;
 
+// MatchSchema.statics.getLikesAndViewFromVideoId = function (matchDocIds, videoDocIds) {
+//   let Match = this;
+//
+//   Match.find({ _id: { $all: matchDocIds } }).then((matches) => {
+//     let len = -1;
+//     return matches.map((match) => {
+//       len++;
+//
+//       if (match.videos[0]._id === videoDocIds[len]) {
+//         return { views: match.views, like: match.lLikes };
+//       } else {
+//         return { views: match.views, like: match.rLikes };
+//       }
+//     });
+//   })
+// }
+
 MatchSchema.statics.upLikes = function (videosId, which) {
   let Match = this;
 

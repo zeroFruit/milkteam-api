@@ -5,6 +5,7 @@ import {User}     from '../../models/user';
 import {Video}    from '../../models/video';
 import {Match}    from '../../models/match';
 import {MainChatRoom} from '../../models/mainChat';
+import {SubChatRoom} from '../../models/subChat';
 
 const userOneId = new ObjectID();
 const userTwoId = new ObjectID();
@@ -101,10 +102,15 @@ const videos = [{
   owner: userOneId
 }];
 
+const matchOneId = new ObjectID();
+const matchTwoId = new ObjectID();
+
 const matches = [{
+  _id: matchOneId,
   videosId: videos[0].videoId + videos[1].videoId,
   videos: [videos[0], videos[1]]
 }, {
+  _id: matchTwoId,
   videosId: videos[2].videoId + videos[3].videoId,
   videos: [videos[2], videos[3]],
   lLikes: 1,
@@ -113,6 +119,10 @@ const matches = [{
 }];
 
 const mainChats = [{
+
+}];
+
+const subChats = [{
 
 }];
 
@@ -153,6 +163,12 @@ const populateMainChats = (done) => {
   });
 }
 
+const populateSubChats = (done) => {
+  SubChatRoom.remove({}).then(() => {
+    done();
+  });
+}
+
 module.exports = {
   users,
   populateUsers,
@@ -160,5 +176,6 @@ module.exports = {
   populateVideos,
   matches,
   populateMatches,
-  populateMainChats
+  populateMainChats,
+  populateSubChats
 };

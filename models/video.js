@@ -13,8 +13,20 @@ const VideoSchema = new mongoose.Schema({
   attribute:  { type: String, required: true },
   matched:    { type: Boolean, default: false },
   main:       { type: Number, default: 0 },
-  owner:      { type: Schema.Types.ObjectId }
+  owner:      { type: Schema.Types.ObjectId },
+  match:      { type: Schema.Types.ObjectId },
+  thumbnail:  { type: String }
 });
+
+VideoSchema.statics.updateBothMatchProperty = function (videoDocId, enemyVideoDocId, matchDocId) {
+  let Video = this;
+
+  return Video.update(
+    { $or: [{ _id: videoDocId }, { _id: enemyVideoDocId }] },
+    { $set: { match: matchDocId } },
+    { multi: true }
+  );
+}
 
 VideoSchema.statics.getVideos = function () {
   let Video = this;
@@ -56,7 +68,7 @@ VideoSchema.statics.match = function (videoId) {
           $set: {matched: true}
         }, {
           multi: true
-        }).then(() => resolve(generateVideoData(enemy)))
+        }).then(() => resolve(enemy))
       } else {
         resolve({});
       }
@@ -71,7 +83,7 @@ VideoSchema.methods.upload = function() {
 
   return new Promise((resolve, reject) => {
     return video.save()
-      .then(() => resolve(generateVideoData(video)))
+      .then(() => resolve(video))
       .catch((e) => rejct(e));
   });
 }

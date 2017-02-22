@@ -7,23 +7,26 @@ const responseCode = {
   DELETE_USER_FAIL:               5,
   GET_USER_SUCCESS:               6,
   GET_USER_FAIL:                  7,
-  AUTHENTICATE_FAIL:              8,
+  PUT_USER_SUCCESS:               8,
+  PUT_USER_FAIL:                  9,
 
-  POST_VIDEO_SUCCESS:             10,
-  POST_VIDEO_FAIL:                11,
-  DELETE_VIDEO_SUCCESS:           12,
-  DELETE_VIDEO_FAIL:              13,
-  GET_VIDEO_SUCCESS:              14,
-  GET_VIDEO_FAIL:                 15,
-  VIDEO_NOT_FOUND:                16,
+  POST_VIDEO_SUCCESS:             20,
+  POST_VIDEO_FAIL:                21,
+  DELETE_VIDEO_SUCCESS:           22,
+  DELETE_VIDEO_FAIL:              23,
+  GET_VIDEO_SUCCESS:              24,
+  GET_VIDEO_FAIL:                 25,
+  VIDEO_NOT_FOUND:                26,
 
-  GET_CHATS_SUCCESS:              20,
-  GET_CHATS_FAIL:                 21,
+  GET_CHATS_SUCCESS:              40,
+  GET_CHATS_FAIL:                 41,
 
-  PUT_MATCH_SUCCESS:              30,
-  PUT_MATCH_FAIL:                 31,
+  PUT_MATCH_SUCCESS:              50,
+  PUT_MATCH_FAIL:                 51,
 
-  DOCS_NOT_FOUND:                 100
+  AUTHENTICATE_FAIL:              100,
+  DOCS_NOT_FOUND:                 101,
+  S3_ERROR:                       102
 };
 
 module.exports = responseCode;

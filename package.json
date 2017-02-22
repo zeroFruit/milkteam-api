@@ -42,6 +42,7 @@
     "mongodb": "^2.2.22",
     "mongoose": "^4.8.1",
     "redis": "^2.6.5",
+    "request": "^2.79.0",
     "socket.io": "^1.7.2",
     "validator": "^6.2.1"
   }
