@@ -10,7 +10,8 @@ import {
   populateVideos,
   matches,
   populateMatches,
-  populateMainChats
+  populateMainChats,
+  populateSubChats
 } from './seed/setup';
 import {uploadVideo}          from '../controller/video';
 import {Video}                from '../models/video';
@@ -24,6 +25,7 @@ beforeEach(populateUsers);
 beforeEach(populateVideos);
 beforeEach(populateMatches);
 beforeEach(populateMainChats);
+beforeEach(populateSubChats);
 
 describe('Model Video test', () => {
   it('should upload new video and return', (done) => {
@@ -38,7 +40,7 @@ describe('Model Video test', () => {
     };
     const video = new Video(videoSchema);
     video.upload().then((video) => {
-      expect(video).toExclude({position: videoSchema.position, tier: videoSchema.tier, attribute: videoSchema.attribute});
+      expect(video).toInclude(videoSchema);
 
       Video.findOne({videoId: videoSchema.videoId}).then((video) => {
         expect(video).toInclude(videoSchema);
@@ -105,6 +107,16 @@ describe('Model Video test', () => {
       done();
     }).catch((e) => done(e));
   });
+
+  it('is updateBothMatchProperty test', (done) => {
+    Video.updateBothMatchProperty(videos[0]._id, videos[1]._id, matches[0]._id).then(() => {
+      Video.find({$or: [{_id: videos[0]._id}, {_id: videos[1]._id}]}).then((videos) => {
+        expect(videos[0]).toInclude({match: matches[0]._id});
+        expect(videos[1]).toInclude({match: matches[0]._id});
+        done();
+      });
+    })
+  })
 });
 
 describe.only('POST /video', () => {
@@ -113,9 +125,9 @@ describe.only('POST /video', () => {
       video: {
         title: 'newVideo',
         content: 'newVideoContent',
-        videoId: 'newVideoId',
-        champion: 'newVideoChamp',
-        position: 'newVideoPos',
+        videoId: 'GPexqi3flNM',
+        champion: 'videoOneChamp',
+        position: 'videoOnePos',
         tier: 'newVideoTier',
         attribute: 'newVideoAttriute'
       }
@@ -137,12 +149,17 @@ describe.only('POST /video', () => {
 
         Video.findOne({videoId: body.video.videoId}).then((video) => {
           expect(video).toInclude(body.video);
+          expect(video.thumbnail).toEqual('https://i.ytimg.com/vi/GPexqi3flNM/default.jpg');
 
           User.findById(users[0]._id).populate('videos').then((user) => {
             expect(user.videos[0]).toInclude(body.video);
             MainChatRoom.findOne({videoId: body.video.videoId}).then((chatroom) => {
               expect(chatroom).toExist();
-              done();
+
+              Match.findById(video.match).then((match) => {
+                expect(match).toExist();
+                done();
+              });
             })
           })
         }).catch((e) => done(e));

@@ -1,5 +1,6 @@
 import expect from 'expect';
 import helper from '../helpers/helper';
+import {getThumbnailFromId} from '../helpers/youtubeHelper';
 import {
   videos,
   populateVideos,
@@ -74,4 +75,15 @@ describe('helpers test', () => {
       done();
     }).catch((e) => done(e));
   })
+});
+
+describe('Youtube API Helper', () => {
+  it('should return thumbnail link from video id', () => {
+    const videoId = "GPexqi3flNM";
+    getThumbnailFromId(videoId).then((link) => {
+      expect(link).toEqual('https://i.ytimg.com/vi/GPexqi3flNM/default.jpg');
+    }).catch((e) => {
+      console.log(e);
+    })
+  });
 });
