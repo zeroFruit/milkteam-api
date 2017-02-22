@@ -23,4 +23,22 @@ async function authenticate (req, res, next) {
   }
 }
 
-module.exports = {authenticate};
+async function checkTokenAndPass (req, res, next) {
+  let token = req.header('x-auth');
+
+  try {
+    let user = await User.checkToken(token);
+
+    if (!user) {
+      return next();
+    }
+
+    req.user = user;
+    req.token = token;
+    next();
+  } catch (e) {
+    responseByCode(res, Code.AUTHENTICATE_FAIL, 401);
+  }
+}
+
+module.exports = {authenticate, checkTokenAndPass};

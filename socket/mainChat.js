@@ -14,7 +14,7 @@ module.exports = (server) => {
   const io = socketIO(server, {path: MAIN_CHAT_URL});
 
   io.on('connection', (socket) => {
-    console.log('New user connected to Main chat');
+    console.log(`${socket.id} connected to Main chat`);
     /*
       params: {
         videoId,
@@ -23,9 +23,10 @@ module.exports = (server) => {
         }
       }
     */
-    socket.on('join', (params, callback) => {
+    socket.on('join', (params) => {
       let {videoId, user: {token}} = params;
-      let chatter = { id: socket.id };
+      let chatter = { videoId, id: socket.id };
+      let oldVideoId;
 
       User.findByToken(token).then((user) => {
 
@@ -34,52 +35,64 @@ module.exports = (server) => {
           chatter.anonymous = true;
         } else {
           chatter.displayName = user.displayName;
+          //chatter.displayName = faker.internet.userName();
           chatter.anonymous = false;
         }
 
-        socket.join(videoId);
+        let jsonChatterStr = JSON.stringify(chatter);
 
-        redisClient.hget(MAIN_CHAT_REDIS_KEY, chatter.id, (err, reply) => {
+        redisClient.hget(MAIN_CHAT_REDIS_KEY, socket.id, (err, reply) => {
           if (!reply) {
-            redisClient.hmset(MAIN_CHAT_REDIS_KEY, chatter.id, videoId);
+            oldVideoId = videoId; // 처음 채팅입장이므로 chatter 데이터를 사용.
+            redisClient.hmset(MAIN_CHAT_REDIS_KEY, socket.id, jsonChatterStr);
+            socket.join(videoId);
+
+          } else if (JSON.parse(reply).videoId !== videoId) {
+            oldVideoId = JSON.parse(reply).videoId; // 다른 채팅방에서 왔으므로 redis에 저장되어있는 값 사용
+
+            redisClient.hmset(MAIN_CHAT_REDIS_KEY, socket.id, jsonChatterStr);
+            socket.leave(oldVideoId); // leave old room
+            socket.join(videoId); // join new room
+          } else {
+            oldVideoId = videoId;
           }
-        });
 
-        MainChatRoom.removeChatter(videoId, chatter).then(() => {
-          MainChatRoom.addChatter(videoId, chatter).then((chatter) => {
-
-            socket.emit('newMessage', {msg: `WELCOME MESSAGE TO ${chatter.displayName}`});
-            socket.broadcast.to(videoId).emit('newMessage', {msg: 'NEW USER ALERT MESSAGE'});
-
-            callback();
+          MainChatRoom.removeChatter(oldVideoId, chatter).then((out) => {
+            MainChatRoom.addChatter(videoId, chatter).then((chat) => {
+              socket.emit('newMessage', generateMessage(socket.id, "Welcome", chatter.displayName));
+              socket.broadcast.to(videoId).emit('newMessage', generateMessage(socket.id, "Alert", chatter.displayName));
+            }).catch((e) => {
+              console.log(e);
+            })
           });
         });
       });
     });
 
     socket.on('createMessage', (message) => {
-      redisClient.hget(MAIN_CHAT_REDIS_KEY, socket.id, (err, videoId) => {
-        if (!err && videoId && isRealString(message.text)) {
-          io.to(videoId).emit('newMessage', generateMessage(socket.id, message.text));
+      redisClient.hget(MAIN_CHAT_REDIS_KEY, socket.id, (err, jsonStr) => {
+        if (!err && jsonStr && isRealString(message.text)) {
+          let {displayName, videoId} = JSON.parse(jsonStr);
+
+          io.to(videoId).emit('newMessage', generateMessage(socket.id, message.text, displayName));
         } else {
           console.log(err);
         }
       });
     });
 
-    socket.on('disconnect', (params, callback) => {
+    socket.on('disconnect', (params) => {
       let chatter = { id: socket.id };
-      let videoId;
 
-      console.log('User was disconnected');
+      console.log(`${socket.id} was disconnected`);
 
-      redisClient.hget(MAIN_CHAT_REDIS_KEY, chatter.id, (err, reply) => {
-        if (reply) {
-          videoId = reply;
-          redisClient.hdel(MAIN_CHAT_REDIS_KEY, chatter.id);
+      redisClient.hget(MAIN_CHAT_REDIS_KEY, socket.id, (err, jsonStr) => {
+        if (jsonStr) {
+          let {videoId, displayName} = JSON.parse(jsonStr);
 
+          redisClient.hdel(MAIN_CHAT_REDIS_KEY, socket.id);
           MainChatRoom.removeChatter(videoId, chatter).then((chatter) => {
-            io.to(videoId).emit('createMessage', {msg: `${chatter.displayName} LEFT`});
+            io.to(videoId).emit('createMessage', generateMessage(socket.id, 'Left', displayName));
           });
         }
       });
