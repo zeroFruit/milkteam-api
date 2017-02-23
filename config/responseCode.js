@@ -24,6 +24,9 @@ const responseCode = {
   PUT_MATCH_SUCCESS:              50,
   PUT_MATCH_FAIL:                 51,
 
+  GET_ALARMS_SUCCESS:             70,
+  GET_ALARMS_FAIL:                71,    
+
   AUTHENTICATE_FAIL:              100,
   DOCS_NOT_FOUND:                 101,
   S3_ERROR:                       102

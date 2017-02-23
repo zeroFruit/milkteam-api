@@ -82,6 +82,7 @@ async function uploadVideo (req, res) {
     await subChat.save();
     let enemyId = await Video.getOwner(enemyVideo.videoId);
     //alarmIO(server, video.videoId, req.user._id, enemy.videoId, enemyId);
+    User.addAlarm(enemyId);
 
     res.json({
       code: Code.POST_VIDEO_SUCCESS,

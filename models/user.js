@@ -4,6 +4,7 @@ import _            from 'lodash';
 import jwt          from 'jsonwebtoken';
 import bcrypt       from 'bcryptjs';
 import {Schema}     from 'mongoose';
+import alarmSchema  from './alarm.Schema'
 import PreferenceSchema from './preference.Schema';
 import ProfileSchema from './profile.Schema';
 
@@ -25,6 +26,9 @@ const UserSchema = new mongoose.Schema({
     type: String,
     require: true
   },
+  lastAlarmRead: {
+    type: Schema.Types.ObjectId
+  },
   tokens: [{
     access: {
       type: String,
@@ -39,6 +43,7 @@ const UserSchema = new mongoose.Schema({
     type: Schema.Types.ObjectId,
     ref: 'video'
   }],
+  alarms: [alarmSchema],
   preference: [PreferenceSchema],
   profile: [ProfileSchema]
 });
@@ -142,6 +147,55 @@ UserSchema.methods.uploadVideo = function (video) {
       .then(() => resolve(video))
       .catch((e) => reject(e));
   });
+}
+
+/**
+ * 알람 리턴 함수 (최근 3개까지 리턴)
+ * @params userId
+ * @author 김진혁
+ * @date 2017-02-20
+ */
+UserSchema.statics.getAlarms = function (userId) {
+  let User = this;
+
+  return new Promise((resolve, reject) => {
+    User.findById(userId)
+    .select('lastAlarmRead alarms')
+    .then((user) => {
+      if (_.isEmpty(user.alarms)) {
+        resolve([]);
+      } else {
+        let lastAlarmId = _.maxBy(user.alarms, '_id');
+        user.lastAlarmRead = lastAlarmId._id;
+        user.save().then(() => {
+          let alarms = user.alarms;
+          alarms = _.slice(_.sortBy(alarms, [(o) => {return -o._id}]), 0, 3);
+          resolve(alarms);
+        });
+      }
+      
+    }).catch((e) => reject(e));
+  });
+}
+
+/**
+ * 알람 등록 함수
+ * @params userId
+ * @author 김진혁
+ * @date 2017-02-20
+ */
+UserSchema.statics.addAlarm = function (userId) {
+  let User = this;
+
+  return new Promise((resolve, reject) => {
+    User.findById(userId).then((user) => {
+      let alarm = { text: '회원님의 매드무비가 메인영상에 올라왔습니다!' };
+      user.alarms.push(alarm);
+      user.save().then(() => {
+        resolve();
+      })
+    }).catch((e) => reject(e));
+  })
 }
 
 UserSchema.methods.deleteVideo = function (video) {
