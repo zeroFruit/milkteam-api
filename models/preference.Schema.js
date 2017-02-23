@@ -1,18 +1,18 @@
 import mongoose, {Schema} from 'mongoose';
 
 const PreferenceSchema = new Schema({
-  character: {
+  character: [{
     type: String,
     required: true
-  },
-  position: {
+  }],
+  position: [{
     type: String,
     required: true
-  },
-  tier: {
+  }],
+  tier: [{
     type: String,
     required: true
-  }
+  }]
 });
 
 module.exports = PreferenceSchema;

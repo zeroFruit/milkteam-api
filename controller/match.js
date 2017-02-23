@@ -61,7 +61,32 @@ async function updateViews (req, res) {
   }
 }
 
+/*
+  position, page
+*/
+async function getFilteredMatches (req, res) {
+  let {position, page} = req.query;
+
+  try {
+    page = parseInt(page);
+
+    let match = await Match.getLatestMatch(position, page);
+
+    // match data 필터링 해주기
+
+    // redis에 history 추가해주기
+
+    res.json({
+      code: Code.GET_MATCH_SUCCESS,
+      data: match
+    });
+  } catch (e) {
+    responseByCode(res, Code.GET_MATCH_FAIL, 400);
+  }
+}
+
 module.exports = {
   updateLikes,
-  updateViews
+  updateViews,
+  getFilteredMatches
 };

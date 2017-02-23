@@ -19,7 +19,7 @@ import {User}                 from '../models/user';
 import {Match}                from '../models/match';
 import {MainChatRoom}         from '../models/mainChat';
 import {SubChat}              from '../models/subChat';
-import {matchingHelper, NUMBER_OF_MAIN_VIDEOS}       from '../helpers/helper';
+import {matchingHelper}       from '../helpers/helper';
 
 beforeEach(populateUsers);
 beforeEach(populateVideos);
@@ -31,7 +31,7 @@ describe('Model Video test', () => {
   it('should upload new video and return', (done) => {
     const videoSchema = {
       title: 'newVideo',
-      content: 'newVideoContent',
+      desc: 'newVideoContent',
       videoId: 'newVideoId',
       champion: 'newVideoChamp',
       position: 'newVideoPos',
@@ -100,10 +100,8 @@ describe('Model Video test', () => {
   });
 
   it('is getVideos test', (done) => {
-    Video.getVideos().then((rVideos) => {
-      expect(rVideos.length).toBe(6);
-      expect(rVideos[0]).toInclude({title: videos[0].title, content: videos[0].content, videoId: videos[0].videoId});
-      expect(rVideos[0]).toExclude({position: videos[0].position});
+    Video.getMainVideos().then((rVideos) => {
+      expect(rVideos.length).toBe(2);
       done();
     }).catch((e) => done(e));
   });
@@ -119,12 +117,12 @@ describe('Model Video test', () => {
   })
 });
 
-describe.only('POST /video', () => {
+describe('POST /video', () => {
   it('should upload a new video', (done) => {
     const body = {
       video: {
         title: 'newVideo',
-        content: 'newVideoContent',
+        desc: 'newVideoContent',
         videoId: 'GPexqi3flNM',
         champion: 'videoOneChamp',
         position: 'videoOnePos',
@@ -214,7 +212,7 @@ describe('GET /video', () => {
   beforeEach((done) => {
     const videoSchema = {
       title: 'newVideo',
-      content: 'newVideoContent',
+      desc: 'newVideoContent',
       videoId: 'newVideoId',
       champion: 'newVideoChamp',
       position: 'newVideoPos',
@@ -246,26 +244,28 @@ describe('GET /video', () => {
 describe('GET /video/main', () => {
   it('should get proper mainVideo who has accessToken', (done) => {
     const preference = {
-      character: 'videoOneChamp',
-      position: 'videoOnePos',
-      tier: 'VideoTwoTier'
+      character: ['videoOneChamp'],
+      position: ['videoOnePos'],
+      tier: ['videoTwoTier'],
+      page: 0,
+      customed: true
     };
 
     request(app)
       .get('/video/main')
       .set('x-auth', users[0].tokens[0].token)
-      .query(preference)
+      .query('character[]=videoOneChamp&position[]=videoOnePos&tier[]=videoTwoTier&page=0&customed=true')
       .expect(200)
       .expect((res) => {
         let len;
 
-        if (res.body.data.length > NUMBER_OF_MAIN_VIDEOS) {
-          len = NUMBER_OF_MAIN_VIDEOS;
-        } else {
-          len = res.body.data.length;
-        }
+        // if (res.body.data.length > NUMBER_OF_MAIN_VIDEOS) {
+        //   len = NUMBER_OF_MAIN_VIDEOS;
+        // } else {
+        //   len = res.body.data.length;
+        // }
         expect(res.body.code).toBe(Code.GET_VIDEO_SUCCESS);
-        expect(res.body.data[0]).toInclude({title: videos[0].title, content: videos[0].content});
+        //expect(res.body.data[0]).toInclude({title: videos[0].title, desc: videos[0].desc});
       })
       .end((err, res) => {
         if (err) {
@@ -275,7 +275,9 @@ describe('GET /video/main', () => {
 
         User.findById(users[0]._id).then((user) => {
           expect(user.preference.length).toBe(1);
-          expect(user.preference[0]).toInclude(preference);
+          expect(user.preference[0].character[0]).toEqual('videoOneChamp');
+          expect(user.preference[0].position[0]).toEqual('videoOnePos');
+          expect(user.preference[0].tier[0]).toEqual('videoTwoTier');
           done();
         }).catch((e) => done(e));
       })
@@ -290,82 +292,18 @@ describe('GET /video/main', () => {
 
     request(app)
       .get('/video/main')
-      .query(preference)
+      .query('character[]=videoOneChamp&position[]=videoOnePos&tier[]=videoTwoTier&page=0&customed=true')
       .expect(200)
       .expect((res) => {
         let len;
 
-        if (res.body.data.length > NUMBER_OF_MAIN_VIDEOS) {
-          len = NUMBER_OF_MAIN_VIDEOS;
-        } else {
-          len = res.body.data.length;
-        }
+        // if (res.body.data.length > NUMBER_OF_MAIN_VIDEOS) {
+        //   len = NUMBER_OF_MAIN_VIDEOS;
+        // } else {
+        //   len = res.body.data.length;
+        // }
         expect(res.body.code).toBe(Code.GET_VIDEO_SUCCESS);
-        expect(res.body.data[0]).toInclude({title: videos[0].title, content: videos[0].content});
-      })
-      .end(done);
-  });
-});
-
-describe('GET /video/main', () => {
-  it('should get proper mainVideo who has accessToken', (done) => {
-    const preference = {
-      character: 'videoOneChamp',
-      position: 'videoOnePos',
-      tier: 'VideoTwoTier'
-    };
-
-    request(app)
-      .get('/video/main')
-      .set('x-auth', users[0].tokens[0].token)
-      .query(preference)
-      .expect(200)
-      .expect((res) => {
-        let len;
-
-        if (res.body.data.length > NUMBER_OF_MAIN_VIDEOS) {
-          len = NUMBER_OF_MAIN_VIDEOS;
-        } else {
-          len = res.body.data.length;
-        }
-        expect(res.body.code).toBe(Code.GET_VIDEO_SUCCESS);
-        expect(res.body.data[0]).toInclude({title: videos[0].title, content: videos[0].content});
-      })
-      .end((err, res) => {
-        if (err) {
-          console.log(err);
-          done(err);
-        }
-
-        User.findById(users[0]._id).then((user) => {
-          expect(user.preference.length).toBe(1);
-          expect(user.preference[0]).toInclude(preference);
-          done();
-        }).catch((e) => done(e));
-      })
-  });
-
-  it('should get proper mainVideos who has not accessToken', (done) => {
-    const preference = {
-      character: 'videoOneChamp',
-      position: 'videoOnePos',
-      tier: 'VideoTwoTier'
-    };
-
-    request(app)
-      .get('/video/main')
-      .query(preference)
-      .expect(200)
-      .expect((res) => {
-        let len;
-
-        if (res.body.data.length > NUMBER_OF_MAIN_VIDEOS) {
-          len = NUMBER_OF_MAIN_VIDEOS;
-        } else {
-          len = res.body.data.length;
-        }
-        expect(res.body.code).toBe(Code.GET_VIDEO_SUCCESS);
-        expect(res.body.data[0]).toInclude({title: videos[0].title, content: videos[0].content});
+        //expect(res.body.data[0]).toInclude({title: videos[0].title, desc: videos[0].desc});
       })
       .end(done);
   });

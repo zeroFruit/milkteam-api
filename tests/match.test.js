@@ -15,7 +15,7 @@ beforeEach(populateMatches);
 const LEFT_LIKES = -1;
 const RIGHT_LIKES = 1;
 
-describe('Model Match test', () => {
+describe.only('Model Match test', () => {
   it('is upLike test', (done) => {
     Match.upLikes(matches[0].videosId, LEFT_LIKES).then(({lLikes, rLikes}) => {
       expect(lLikes).toBe(1);
@@ -48,6 +48,19 @@ describe('Model Match test', () => {
         expect(match.views).toBe(1);
         done();
       }).catch((e) => done(e));
+    })
+  });
+
+  it('is getLatestMatch test', (done) => {
+    let newMatch = new Match({videosId: 'newMatch', videos: [videos[0], videos[2]]});
+    newMatch.save().then(() => {
+      Match.getLatestMatch(videos[0].position).then((result) => {
+        expect(result[0].videosId).toEqual(newMatch.videosId);
+        done();
+      }).catch((e) => {
+        console.log(e);
+        done(e);
+      })
     })
   });
 });

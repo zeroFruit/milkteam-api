@@ -1,7 +1,7 @@
 import mongoose, {Schema} from 'mongoose';
 
 const ProfileSchema = new Schema({
-  originalName: {type: String},
+  key: {type: String},
   tag: {type: String},
   link: {type: String}
 });

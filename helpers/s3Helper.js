@@ -32,9 +32,10 @@ const uploadImg = (userId, Key, userFilePath, callback) => {
       if (err) {
         return callback(err);
       }
+      const newKey = Date.now() + "-" + Key;
       const params = {
         Bucket: BUCKET_NAME,
-        Key: userId + "-" + Key,
+        Key:  newKey,
         ACL: 'public-read',
         Body: new Buffer(stdout, 'binary'),
         ContentType: features['mime type']
@@ -43,6 +44,7 @@ const uploadImg = (userId, Key, userFilePath, callback) => {
         if (err) {
           return callback(err);
         }
+        data.newKey = newKey;
 
         callback(null, data);
       });
@@ -50,11 +52,26 @@ const uploadImg = (userId, Key, userFilePath, callback) => {
   })
 }
 
-// const downloadImg = ({key}) => {
-//   const file = fs.createWriteStream(key);
-//   s3.getObject({Bucket: BUCKET_NAME, Key: key}).createReadStream().pipe(file);
-// }
+const checkAndRemoveImg = (Key, callback) => {
+  if (!Key) {
+    return callback(null);
+  }
+
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key
+  };
+
+  s3.deleteObject(params, (err, data) => {
+    if (err) {
+      return callback(err);
+    }
+
+    callback(null, data);
+  });
+}
 
 module.exports = {
-  uploadImg
+  uploadImg,
+  checkAndRemoveImg
 };

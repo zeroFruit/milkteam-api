@@ -17,14 +17,8 @@ const UserSchema = new mongoose.Schema({
       validator: validator.isEmail
     }
   },
-  password: {
-    type: String,
-    require: true
-  },
-  displayName: {
-    type: String,
-    require: true
-  },
+  password: { type: String, require: true },
+  displayName: { type: String, require: true },
   tokens: [{
     access: {
       type: String,
@@ -35,10 +29,7 @@ const UserSchema = new mongoose.Schema({
       required: true
     }
   }],
-  videos: [{
-    type: Schema.Types.ObjectId,
-    ref: 'video'
-  }],
+  videos: [{ type: Schema.Types.ObjectId, ref: 'video' }],
   preference: [PreferenceSchema],
   profile: [ProfileSchema]
 });
@@ -68,6 +59,8 @@ UserSchema.statics.updateProfile = function (userId, profile) {
 
 UserSchema.methods.updatePreference = function(preference) {
   let user = this;
+
+  preference = _.pick(preference, ['character', 'position', 'tier']);
 
   if (user.preference.length === 0) {
     user.preference.push(preference);
@@ -125,7 +118,6 @@ UserSchema.statics.getVideos = function (userId) {
             likes: 0 // 메인 영상일 때 좋아요 수
           };
         }
-
       });
       resolve(returnVideosArr);
     }).catch((e) => reject(e));
@@ -233,7 +225,6 @@ UserSchema.statics.findByCredentials = function (email, password) {
 
     return new Promise((resolve, reject) => {
       bcrypt.compare(password, user.password, (err, result) => {
-        console.log(result);
         if (err) {
           reject();
         }

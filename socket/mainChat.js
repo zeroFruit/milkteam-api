@@ -29,14 +29,15 @@ module.exports = (server) => {
       let oldVideoId;
 
       User.findByToken(token).then((user) => {
-
         if (!user) {
           chatter.displayName = faker.internet.userName;
           chatter.anonymous = true;
+          chatter.profile = null;
         } else {
           chatter.displayName = user.displayName;
           //chatter.displayName = faker.internet.userName();
           chatter.anonymous = false;
+          chatter.profile = user.profile[0].link;
         }
 
         let jsonChatterStr = JSON.stringify(chatter);
@@ -59,8 +60,8 @@ module.exports = (server) => {
 
           MainChatRoom.removeChatter(oldVideoId, chatter).then((out) => {
             MainChatRoom.addChatter(videoId, chatter).then((chat) => {
-              socket.emit('newMessage', generateMessage(socket.id, "Welcome", chatter.displayName));
-              socket.broadcast.to(videoId).emit('newMessage', generateMessage(socket.id, "Alert", chatter.displayName));
+              socket.emit('newMessage', generateMessage(socket.id, "Welcome", chatter.displayName, chatter.profile));
+              socket.broadcast.to(videoId).emit('newMessage', generateMessage(socket.id, "Alert", chatter.displayName, chatter.profile));
             }).catch((e) => {
               console.log(e);
             })
@@ -72,9 +73,9 @@ module.exports = (server) => {
     socket.on('createMessage', (message) => {
       redisClient.hget(MAIN_CHAT_REDIS_KEY, socket.id, (err, jsonStr) => {
         if (!err && jsonStr && isRealString(message.text)) {
-          let {displayName, videoId} = JSON.parse(jsonStr);
+          let {displayName, videoId, profile} = JSON.parse(jsonStr);
 
-          io.to(videoId).emit('newMessage', generateMessage(socket.id, message.text, displayName));
+          io.to(videoId).emit('newMessage', generateMessage(socket.id, message.text, displayName, profile));
         } else {
           console.log(err);
         }
@@ -88,11 +89,11 @@ module.exports = (server) => {
 
       redisClient.hget(MAIN_CHAT_REDIS_KEY, socket.id, (err, jsonStr) => {
         if (jsonStr) {
-          let {videoId, displayName} = JSON.parse(jsonStr);
+          let {videoId, displayName, profile} = JSON.parse(jsonStr);
 
           redisClient.hdel(MAIN_CHAT_REDIS_KEY, socket.id);
           MainChatRoom.removeChatter(videoId, chatter).then((chatter) => {
-            io.to(videoId).emit('createMessage', generateMessage(socket.id, 'Left', displayName));
+            io.to(videoId).emit('createMessage', generateMessage(socket.id, 'Left', displayName, profile));
           });
         }
       });

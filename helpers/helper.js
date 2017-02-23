@@ -11,11 +11,12 @@ const isRealString = (str) => {
   return typeof str === 'string' && str.trim().length > 0;
 };
 
-const generateMessage = (from, msg, displayName) => {
+const generateMessage = (from, msg, displayName, profile = null) => {
   return {
     from,
     msg,
     displayName,
+    profile,
     date: moment().tz('Asia/Seoul').format('YYYY-MM-DD HH:mm')
   };
 };
@@ -66,28 +67,32 @@ const matchingHelper = (target, videos) => {
   http 응답시 _id 를 제외한 데이터만 추출해서 object형태로 리턴
 */
 const generateVideoData = (video) => {
-  return _.pick(video, ['title', 'content', 'videoId', 'owner', 'matched', 'main']);
+  return _.pick(video, ['title', 'desc', 'videoId', 'owner', 'matched', 'duration']);
 };
 
-const NUMBER_OF_MAIN_VIDEOS = 5;
+//const NUMBER_OF_MAIN_VIDEOS = 5;
 
-const getMainVideoHelper = (preference, videos) => {
-
-  let {character, position, tier} = preference;
-
-  videos = videos.filter((video) => {
-    let point = 0;
-    if (video.character === character) point++;
-    if (video.position === position) point++;
-    if (video.tier === tier) point++;
-    video.points = point;
-
-    return true;
-  });
-
-  return _.takeRight(_.sortBy(videos, 'points').reverse(), NUMBER_OF_MAIN_VIDEOS).reverse();
-  //return _.max(videos, _.property('points'));
-};
+// const getMainVideoHelper = (preference, videos) => {
+//
+//   if (!preference) {
+//     // 커스터마이징 카드 설정 건너뛰었을 때
+//     //return _.takeRight
+//   } else {
+//     let {character, position, tier} = preference;
+//
+//     videos = videos.filter((video) => {
+//       let point = 0;
+//       if (video.character === character) point++;
+//       if (video.position === position) point++;
+//       if (video.tier === tier) point++;
+//       video.points = point;
+//
+//       return true;
+//     });
+//
+//     return _.takeRight(_.sortBy(videos, 'points').reverse(), NUMBER_OF_MAIN_VIDEOS).reverse();
+//   }
+// };
 
 const removeMatchesWithVideoId = (matches, videoId) => {
   matches = matches.filter((match) => {
@@ -111,23 +116,20 @@ const getPercentage = ({lLikes, rLikes}) => {
   }
 }
 
-
 const PER_PAGE = 5;
 
 const getPaginatedItems = (items, page = 1) => {
 
 }
 
-
 module.exports = {
-  NUMBER_OF_MAIN_VIDEOS,
+  //NUMBER_OF_MAIN_VIDEOS,
   responseByCode,
   isRealString,
   generateMessage,
   YouTubeGetID,
   matchingHelper,
   generateVideoData,
-  getMainVideoHelper,
   removeMatchesWithVideoId,
   getPercentage
 }

@@ -44,7 +44,7 @@ const videos = [{
   // object for matching test : target
   _id: videoOneId,
   title: 'videoOneTitle',
-  content: 'videoOneContent',
+  desc: 'videoOneContent',
   videoId: 'videoOneId',
   champion: 'videoOneChamp',
   position: 'videoOnePos',
@@ -53,7 +53,7 @@ const videos = [{
 }, {
   _id: videoTwoId,
   title: 'videoTwoTitle',
-  content: 'videoTwoContent',
+  desc: 'videoTwoContent',
   videoId: 'videoTwoId',
   champion: 'videoTwoChamp',
   position: 'videoTwoPos',
@@ -63,7 +63,7 @@ const videos = [{
   // object for matching test : point under 2
   _id: videoThreeId,
   title: 'videoThreeTitle',
-  content: 'videoThreeContent',
+  desc: 'videoThreeContent',
   videoId: 'videoThreeId',
   champion: 'videoThreeChamp',
   position: 'videoThreePos',
@@ -73,7 +73,7 @@ const videos = [{
   // object for matching test : point over 2
   _id: videoFourId,
   title: 'videoFourTitle',
-  content: 'videoFourContent',
+  desc: 'videoFourContent',
   videoId: 'videoFourId',
   champion: 'videoOneChamp', // same
   position: 'videoOnePos',   // same
@@ -83,7 +83,7 @@ const videos = [{
   // object for matching test : point over 2
   _id: videoFiveId,
   title: 'videoFiveTitle',
-  content: 'videoFiveContent',
+  desc: 'videoFiveContent',
   videoId: 'videoFiveId',
   champion: 'videoOneChamp', // same
   position: 'videoOnePos',   // same
@@ -93,7 +93,7 @@ const videos = [{
   // object for getOnwer test
   _id: videoSixId,
   title: 'videoSixTitle',
-  content: 'videoSixContent',
+  desc: 'videoSixContent',
   videoId: 'videoSixId',
   champion: 'videoSixChamp',
   position: 'videoSixPos',
