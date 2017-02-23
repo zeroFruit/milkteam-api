@@ -9,7 +9,7 @@ import {
   populateSubRoom
 } from './seed/socket.setup.js';
 
-describe.only('Sub-Chatroom test', () => {
+describe.skip('Sub-Chatroom test', () => {
 
   beforeEach(populateRoom);
   beforeEach(populateSubRoom);
@@ -22,11 +22,14 @@ describe.only('Sub-Chatroom test', () => {
     };
 
     SubChatRoom.addChatter(subChatRooms[0].videoId, newChatter).then((chatter) => {
-        SubChatRoom.findOne({ videoId: subChatRooms[0].videoId }).then((room) => {
+        SubChatRoom.findOne({ videoIds: subChatRooms[0].videoId }).then((room) => {
           expect(room.chatters.length).toBe(4);
           expect(room.chatters[3].id).toEqual('NewChatter');
           done();
-        });
+        }).catch((e) => {
+          console.log(e);
+          done(e);
+        })
       });
   });
 

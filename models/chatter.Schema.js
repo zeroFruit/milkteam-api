@@ -13,6 +13,10 @@ const ChatterSchema = new Schema({
   anonymous: {
     type: Boolean,
     required: true
+  },
+  videoId: {
+    type: String,
+    required: true
   }
 });
 

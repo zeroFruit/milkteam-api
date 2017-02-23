@@ -52,7 +52,7 @@ MainChatRoomSchema.statics.removeChatter = function (videoId, chatter) {
       room.chatters.id(out[0]._id).remove();
       return room.save()
         .then(() => resolve(out[0]))
-        .catch(reject);
+        .catch(() => reject());
     });
   })
 };

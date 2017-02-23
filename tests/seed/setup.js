@@ -3,6 +3,9 @@ import jwt        from 'jsonwebtoken';
 
 import {User}     from '../../models/user';
 import {Video}    from '../../models/video';
+import {Match}    from '../../models/match';
+import {MainChatRoom} from '../../models/mainChat';
+import {SubChatRoom} from '../../models/subChat';
 
 const userOneId = new ObjectID();
 const userTwoId = new ObjectID();
@@ -99,13 +102,37 @@ const videos = [{
   owner: userOneId
 }];
 
+const matchOneId = new ObjectID();
+const matchTwoId = new ObjectID();
+
+const matches = [{
+  _id: matchOneId,
+  videosId: videos[0].videoId + videos[1].videoId,
+  videos: [videos[0], videos[1]]
+}, {
+  _id: matchTwoId,
+  videosId: videos[2].videoId + videos[3].videoId,
+  videos: [videos[2], videos[3]],
+  lLikes: 1,
+  rLikes: 2,
+  views: 3
+}];
+
+const mainChats = [{
+
+}];
+
+const subChats = [{
+
+}];
+
 const populateUsers = (done) => {
   User.remove({}).then(() => {
-    let userOne = new User(users[0]).save();
-    let userTwo = new User(users[1]).save();
+    let userOne = new User(users[0]);
+    let userTwo = new User(users[1]);
 
-    return Promise.all([userOne, userTwo]);
-  }).then(() => done());
+    return Promise.all([userOne.save(), userTwo.save()]).then(() => done());
+  });
 };
 
 const populateVideos = (done) => {
@@ -117,8 +144,38 @@ const populateVideos = (done) => {
     let videoFive = new Video(videos[4]).save();
     let videoSix  = new Video(videos[5]).save();
 
-    return Promise.all([videoOne, videoTwo, videoThree, videoFour, videoFive, videoSix]);
-  }).then(() => done());
+    return Promise.all([videoOne, videoTwo, videoThree, videoFour, videoFive, videoSix]).then(() => done());
+  })
 };
 
-module.exports = {users, populateUsers, videos, populateVideos};
+const populateMatches = (done) => {
+  Match.remove({}).then(() => {
+    let matchOne = new Match(matches[0]).save();
+    let matchTwo = new Match(matches[1]).save();
+
+    return Promise.all([matchOne, matchTwo]).then(() => done());
+  });
+};
+
+const populateMainChats = (done) => {
+  MainChatRoom.remove({}).then(() => {
+    done();
+  });
+}
+
+const populateSubChats = (done) => {
+  SubChatRoom.remove({}).then(() => {
+    done();
+  });
+}
+
+module.exports = {
+  users,
+  populateUsers,
+  videos,
+  populateVideos,
+  matches,
+  populateMatches,
+  populateMainChats,
+  populateSubChats
+};

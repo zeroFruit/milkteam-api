@@ -1,5 +1,5 @@
 import {mongoose}       from '../config/mongodb';
-import {matchingHelper} from '../helpers/helper';
+import {matchingHelper, generateVideoData} from '../helpers/helper';
 import {Schema}         from 'mongoose';
 
 
@@ -11,10 +11,41 @@ const VideoSchema = new mongoose.Schema({
   position:   { type: String, required: true },
   tier:       { type: String, required: true },
   attribute:  { type: String, required: true },
-  matched:    { type: Boolean, default: false },
-  main:       { type: Boolean, default: false },
-  owner:      { type: Schema.Types.ObjectId }
+  matched:    { type: Boolean, default: false },  // 현재 매칭된 영상이있는지
+  views:      { type: Number, default: 0 },
+  owner:      { type: Schema.Types.ObjectId },
+  match:      { type: Schema.Types.ObjectId, ref: 'match' },
+  thumbnail:  { type: String },
+
 });
+
+VideoSchema.statics.updateBothMatchProperty = function (videoDocId, enemyVideoDocId, matchDocId) {
+  let Video = this;
+
+  return Video.update(
+    { $or: [{ _id: videoDocId }, { _id: enemyVideoDocId }] },
+    { $set: { match: matchDocId } },
+    { multi: true }
+  );
+}
+
+VideoSchema.statics.getMatchIds = function (videosId) {
+  let Video = this;
+
+  Video.find({_id: { $in: videosId } }).then((videos) => {
+    return videos.map((video) => {
+      return { match: video.match };
+    })
+  })
+}
+
+VideoSchema.statics.getVideos = function () {
+  let Video = this;
+
+  return Video.find({}).then((videos) => {
+    return videos.map((video) => generateVideoData(video));
+  });
+}
 
 VideoSchema.statics.getOwner = function (videoId) {
   let Video = this;
@@ -72,9 +103,11 @@ VideoSchema.statics.delete = function(videoId) {
   let Video = this;
 
   return new Promise((resolve, reject) => {
-    Video.findOneAndRemove({ videoId }, null, (err, result) => {
-      if (result) {
-        resolve(result);
+    Video.findOneAndRemove({ videoId }, null, (err, video) => {
+      if (video) {
+        resolve(generateVideoData(video));
+      } else if (err) {
+        reject(err);
       } else {
         reject();
       }

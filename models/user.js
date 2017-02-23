@@ -5,6 +5,8 @@ import jwt          from 'jsonwebtoken';
 import bcrypt       from 'bcryptjs';
 import {Schema}     from 'mongoose';
 import alarmSchema  from './alarm.Schema'
+import PreferenceSchema from './preference.Schema';
+import ProfileSchema from './profile.Schema';
 
 const UserSchema = new mongoose.Schema({
   email: {
@@ -41,19 +43,96 @@ const UserSchema = new mongoose.Schema({
     type: Schema.Types.ObjectId,
     ref: 'video'
   }],
-  alarms: [alarmSchema]
+  alarms: [alarmSchema],
+  preference: [PreferenceSchema],
+  profile: [ProfileSchema]
 });
+
+UserSchema.statics.getProfileLink = function (userId) {
+  let User = this;
+
+  return User.findById(userId).then((user) => {
+    return user.profile[0].link;
+  });
+}
+
+UserSchema.statics.updateProfile = function (userId, profile) {
+  let User = this;
+
+  return User.findById(userId).then((user) => {
+    if (user.profile.length !== 0) {
+      user.profile[0].remove();
+      user.profile.push(profile);
+    } else {
+      user.profile.push(profile);
+    }
+
+    return user.save();
+  });
+}
+
+UserSchema.methods.updatePreference = function(preference) {
+  let user = this;
+
+  if (user.preference.length === 0) {
+    user.preference.push(preference);
+  } else {
+    user.preference[0].remove();
+    user.preference.push(preference);
+  }
+
+  return user.save();
+}
 
 UserSchema.statics.getVideos = function (userId) {
   let User = this;
 
   return new Promise((resolve, reject) => {
-    User.findById(userId).populate('videos').then((user) => {
-      const mappedVideos = user.videos.map((video) => {
-        return {title: video.title};
-      });
+    User.findById(userId).populate({
+      path: 'videos',
+      populate: {
+        path: 'match',
+        model: 'match',
+        populate: {
+          path: 'videos',
+          model: 'video'
+        }
+      }
+    }).then((user) => {
+      let returnVideosArr = user.videos.map((video) => {
+        if (video.matched === true) {
+          if (video.match.videos[0]._id === video._id) {
+            return {
+              title: video.title,
+              id: video.videoId,
+              _id: video._id,
+              thumbnail: video.thumbnail,
+              viewed: video.match.views,
+              likes: video.match.lLikes // 왼쪽 영상의 좋아요 수
+            };
+          } else {
+            return {
+              title: video.title,
+              id: video.videoId,
+              _id: video._id,
+              thumbnail: video.thumbnail,
+              viewed: video.match.views,
+              likes: video.match.rLikes // 오른쪽 영상의 좋아요 수
+            };
+          }
+        } else {
+          return {
+            title: video.title,
+            id: video.videoId,
+            _id: video._id,
+            thumbnail: video.thumbnail,
+            viewed: video.views,
+            likes: 0 // 메인 영상일 때 좋아요 수
+          };
+        }
 
-      resolve(mappedVideos);
+      });
+      resolve(returnVideosArr);
     }).catch((e) => reject(e));
   });
 }
@@ -135,7 +214,7 @@ UserSchema.methods.toJSON = function () {
   let user = this;
   let userObject = user.toObject();
 
-  return _.pick(userObject, ['_id', 'email', 'displayName']);
+  return _.pick(userObject, ['email', 'displayName']);
 };
 
 UserSchema.methods.generateAuthToken = function () {
@@ -159,6 +238,27 @@ UserSchema.methods.removeToken = function (token) {
     }
   });
 };
+
+UserSchema.statics.checkToken = function (token) {
+  let User = this;
+  let decoded;
+
+  if (!token) {
+    return Promise.resolve();
+  }
+
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    return User.findOne({
+      '_id': decoded._id,
+      'tokens.token': token,
+      'tokens.access': 'auth'
+    });
+  } catch (e) {
+    return Promise.reject();
+  }
+}
 
 UserSchema.statics.findByToken = function (token) {
   let User = this;
@@ -187,6 +287,7 @@ UserSchema.statics.findByCredentials = function (email, password) {
 
     return new Promise((resolve, reject) => {
       bcrypt.compare(password, user.password, (err, result) => {
+        console.log(result);
         if (err) {
           reject();
         }
