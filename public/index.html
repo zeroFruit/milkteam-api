@@ -317,7 +317,7 @@ header, .context-menu, .megamenu-content, footer { font-family: "Segoe UI", Aria
 </style>
 </head>
 <body class='typora-export' >
-<div  id='write'  class = 'is-node'><h1><a name='header-c1' class='md-header-anchor '></a>Socket.io</h1><p></p><h2><a name='header-c8' class='md-header-anchor '></a>Connection</h2><pre class="md-fences md-end-block" lang="javascript"> <div class="CodeMirror cm-s-inner CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 0px; left: 3.84px;"></div><div class="CodeMirror-hscrollbar" style="left: 0px;"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-vscrollbar"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-scrollbar-filler"></div><div class="CodeMirror-gutter-filler"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 0px; min-height: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines"><div style="position: relative; outline: none;"><div class="CodeMirror-measure"><span><span>​</span>x</span></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-code"><div class="CodeMirror-activeline" style="position: relative;"><div class="CodeMirror-activeline-background CodeMirror-linebackground"></div><pre class=""><span style="padding-right: 0.1px;"><span class="cm-keyword">const</span> <span class="cm-def">URL</span> <span class="cm-operator">=</span> <span class="cm-variable">ec2</span><span class="cm-operator">-</span><span class="cm-number">52</span><span class="cm-operator">-</span><span class="cm-number">79</span><span class="cm-operator">-</span><span class="cm-number">203</span><span class="cm-operator">-</span><span class="cm-number">90.</span><span class="cm-variable">ap</span><span class="cm-operator">-</span><span class="cm-variable">northeast</span><span class="cm-operator">-</span><span class="cm-number">2.</span><span class="cm-variable">compute</span>.<span class="cm-property">amazonaws</span>.<span class="cm-property">com</span>:<span class="cm-number">3000</span>;</span></pre></div><pre class=""><span style="padding-right: 0.1px;"><span class="cm-keyword">const</span> <span class="cm-def">options</span> <span class="cm-operator">=</span> {</span></pre><pre class=""><span style="padding-right: 0.1px;">  <span class="cm-property">path</span>: <span class="cm-string">'/api/socket/main'</span> <span class="cm-comment">/* 서브화면 채팅일 때 /api/socket/sub */</span></span></pre><pre class=""><span style="padding-right: 0.1px;">};</span></pre><pre class=""><span style="padding-right: 0.1px;"><span>​</span></span></pre><pre class=""><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">socket</span> <span class="cm-operator">=</span> <span class="cm-variable">io</span>.<span class="cm-property">connect</span>(<span class="cm-variable">URL</span>, <span class="cm-variable">options</span>)</span></pre></div></div></div></div></div><div style="position: absolute; height: 30px; width: 1px; top: 0px;"></div><div class="CodeMirror-gutters" style="display: none; height: 132px;"></div></div></div></pre><p></p><p></p><h2><a name='header-c14' class='md-header-anchor '></a>Event</h2><p>&lt;이벤트 명&gt; [서버 측 on/emit 여부]</p><h3><a name='header-c17' class='md-header-anchor '></a>메인화면</h3><p><strong>join  [on]</strong></p><p>메인화면에서 최초 혹은 새로운 영상을 볼 때마다 join 이벤트를 서버로 emit 해줘야함. 그래야 room에 접속할 수 있다.</p><ul><li><p>params</p><pre class='md-fences mock-cm' style='display:block;position:relative'>{
+<div  id='write'  class = 'is-node'><h1><a name='header-c1' class='md-header-anchor '></a>Socket.io</h1><p></p><h2><a name='header-c8' class='md-header-anchor '></a>Connection</h2><pre class="md-fences md-end-block" lang="javascript"> <div class="CodeMirror cm-s-inner CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 0px; left: 3.83997px;"></div><div class="CodeMirror-hscrollbar" style="left: 0px;"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-vscrollbar"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-scrollbar-filler"></div><div class="CodeMirror-gutter-filler"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 0px; min-height: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines"><div style="position: relative; outline: none;"><div class="CodeMirror-measure"><span><span>​</span>x</span></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-code"><div class="CodeMirror-activeline" style="position: relative;"><div class="CodeMirror-activeline-background CodeMirror-linebackground"></div><pre class=""><span style="padding-right: 0.1px;"><span class="cm-keyword">const</span> <span class="cm-def">URL</span> <span class="cm-operator">=</span> <span class="cm-variable">ec2</span><span class="cm-operator">-</span><span class="cm-number">52</span><span class="cm-operator">-</span><span class="cm-number">79</span><span class="cm-operator">-</span><span class="cm-number">203</span><span class="cm-operator">-</span><span class="cm-number">90.</span><span class="cm-variable">ap</span><span class="cm-operator">-</span><span class="cm-variable">northeast</span><span class="cm-operator">-</span><span class="cm-number">2.</span><span class="cm-variable">compute</span>.<span class="cm-property">amazonaws</span>.<span class="cm-property">com</span>:<span class="cm-number">3000</span>;</span></pre></div><pre class=""><span style="padding-right: 0.1px;"><span class="cm-keyword">const</span> <span class="cm-def">options</span> <span class="cm-operator">=</span> {</span></pre><pre class=""><span style="padding-right: 0.1px;">  <span class="cm-property">path</span>: <span class="cm-string">'/api/socket/main'</span> <span class="cm-comment">/* 서브화면 채팅일 때 /api/socket/sub */</span></span></pre><pre class=""><span style="padding-right: 0.1px;">};</span></pre><pre class=""><span style="padding-right: 0.1px;"><span>​</span></span></pre><pre class=""><span style="padding-right: 0.1px;"><span class="cm-keyword">var</span> <span class="cm-def">socket</span> <span class="cm-operator">=</span> <span class="cm-variable">io</span>.<span class="cm-property">connect</span>(<span class="cm-variable">URL</span>, <span class="cm-variable">options</span>)</span></pre></div></div></div></div></div><div style="position: absolute; height: 30px; width: 1px; top: 0px;"></div><div class="CodeMirror-gutters" style="display: none; height: 132px;"></div></div></div></pre><p></p><p></p><h2><a name='header-c14' class='md-header-anchor '></a>Event</h2><p>&lt;이벤트 명&gt; [서버 측 on/emit 여부]</p><h3><a name='header-c17' class='md-header-anchor '></a>메인화면</h3><p><strong>join  [on]</strong></p><p>메인화면에서 최초 혹은 새로운 영상을 볼 때마다 join 이벤트를 서버로 emit 해줘야함. 그래야 room에 접속할 수 있다.</p><ul><li><p>params</p><pre class='md-fences mock-cm' style='display:block;position:relative'>{
   videoId:
   user: {
     token
@@ -371,6 +371,51 @@ body: {
     email,
     displayName
   }
-}</pre><p></p></li></ul><p></p></div>
+}</pre><p></p></li></ul><p><strong>POST /video</strong></p><p>비디오 업로드</p><ul><li><p>request</p><pre class='md-fences mock-cm' style='display:block;position:relative'>header: {
+  x-auth: token
+}
+
+body: {
+  video: {
+    title, 		// title
+    desc, 		// desc
+    videoId, 	// url
+    champion, 	// champion
+    position, 	// position
+    tier, 	    // tier
+    attribute, 	// character
+  }
+}</pre></li><li><p>response</p><pre class='md-fences mock-cm' style='display:block;position:relative'>body: { // 매칭된 대결 영상이 있는 경우
+  code: 20,
+  data: {
+    video: {
+      title,
+      desc,
+      videoId,
+      owner,
+      matched
+    },
+    enemyVideo: { 
+      title,
+      desc,
+      videoId,
+      owner,
+      matched
+    }
+  }
+}
+
+body: { // 매칭된 대결 영상이 없는 경우
+  code: 20,
+  data: {
+    video: {
+      title,
+      desc,
+      videoId,
+      owner,
+      matched
+    }
+  }
+}</pre><p></p></li></ul></div>
 </body>
 </html>

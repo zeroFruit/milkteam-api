@@ -118,7 +118,7 @@ describe('User video association test', () => {
   it('should add new video into the list', (done) => {
     const videoSchema = {
       title: 'newVideo',
-      content: 'newVideoContent',
+      desc: 'newVideoContent',
       videoId: 'newVideoId',
       champion: 'newVideoChamp',
       position: 'newVideoPos',
@@ -147,7 +147,7 @@ describe('User video association test', () => {
   it('should delete video from the list', (done) => {
     const videoSchema = {
       title: 'newVideo',
-      content: 'newVideoContent',
+      desc: 'newVideoContent',
       videoId: 'newVideoId',
       champion: 'newVideoChamp',
       position: 'newVideoPos',
@@ -177,9 +177,8 @@ describe('User video association test', () => {
 
 describe('updateProfile test', () => {
   it('should successfully update profile sub-doc', (done) => {
-
     const profile = {
-      originalName: 'profileName',
+      key: 'profileName',
       tag: 'profileTag',
       link: 'profileLink'
     };
@@ -194,12 +193,12 @@ describe('updateProfile test', () => {
 
   it('should successfully update profile when there is already profile image', (done) => {
     const profile1 = {
-      originalName: 'profileName1',
+      key: 'profileName1',
       tag: 'profileTag1',
       link: 'profileLink1'
     };
     const profile2 = {
-      originalName: 'profileName2',
+      key: 'profileName2',
       tag: 'profileTag2',
       link: 'profileLink2'
     };
@@ -215,6 +214,7 @@ describe('updateProfile test', () => {
     }).catch((e) => done(e));
   })
 });
+
 
 describe('GET /users/displayname/doublecheck', () => {
   it('should respond fail', (done) => {
@@ -277,7 +277,7 @@ describe('User Model test', () => {
     let videoTest = new Video({
       videoId: 'getVideosTest',
       title: 'getVideosTest',
-      content: 'getVideosTest',
+      desc: 'getVideosTest',
       champion: 'getVideosTest',
       position: 'getVideosTest',
       tier: 'getVideosTest',

@@ -1,11 +1,17 @@
 import {mongoose}       from '../config/mongodb';
-import {matchingHelper, generateVideoData} from '../helpers/helper';
+import {
+  matchingHelper,
+  generateVideoData,
+  getMainVideoHelper
+} from '../helpers/helper';
 import {Schema}         from 'mongoose';
+import moment           from 'moment-timezone';
 
+const VIDEOS_PER_PAGE = 2;
 
 const VideoSchema = new mongoose.Schema({
   title:      { type: String, required: true },
-  content:    { type: String },
+  desc:       { type: String },
   videoId:    { type: String, requied: true },
   champion:   { type: String, required: true },
   position:   { type: String, required: true },
@@ -16,7 +22,8 @@ const VideoSchema = new mongoose.Schema({
   owner:      { type: Schema.Types.ObjectId },
   match:      { type: Schema.Types.ObjectId, ref: 'match' },
   thumbnail:  { type: String },
-
+  date:       { type: Date, default: Date.now },
+  duration:   { type: String }
 });
 
 VideoSchema.statics.updateBothMatchProperty = function (videoDocId, enemyVideoDocId, matchDocId) {
@@ -39,12 +46,32 @@ VideoSchema.statics.getMatchIds = function (videosId) {
   })
 }
 
-VideoSchema.statics.getVideos = function () {
+VideoSchema.statics.getMainVideos = function (page = 0) {
   let Video = this;
 
-  return Video.find({}).then((videos) => {
-    return videos.map((video) => generateVideoData(video));
-  });
+  return Video.find({})
+    .sort({date: -1})
+    .skip(page)
+    .limit(VIDEOS_PER_PAGE)
+    .then((videos) => Promise.resolve(videos));
+}
+
+VideoSchema.statics.getFilteredMainVideos = function (page = 0, character = null, position = null, tier = null) {
+  if (character === null || position === null || tier === null) {
+    return Promise.reject();
+  }
+
+  return Video.find({
+    $and: [
+      { character:  { $in: character } },
+      { position:   { $in: position } },
+      { tier:       { $in: tier } }
+    ]
+  })
+  .sort({date: -1})
+  .skip(page)
+  .limit(VIDEOS_PER_PAGE)
+  .then((videos) => Promise.resolve(videos));
 }
 
 VideoSchema.statics.getOwner = function (videoId) {

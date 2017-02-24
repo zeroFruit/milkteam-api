@@ -19,6 +19,7 @@ async function authenticate (req, res, next) {
     req.token = token;
     next();
   } catch (e) {
+    console.log(e);
     responseByCode(res, Code.AUTHENTICATE_FAIL, 401);
   }
 }

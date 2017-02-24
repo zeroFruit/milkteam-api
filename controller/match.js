@@ -2,6 +2,7 @@ import Code from '../config/responseCode';
 import {responseByCode} from '../helpers/helper';
 import {Match} from '../models/match';
 import {getPercentage} from '../helpers/helper';
+import { setHistory, getHistory } from '../helpers/videoHistory';
 
 /*
   {
@@ -61,7 +62,77 @@ async function updateViews (req, res) {
   }
 }
 
+/*
+  position, page
+*/
+async function getFilteredMatches (req, res) {
+  let {position, page} = req.query;
+
+  try {
+    if (page) {
+      page = parseInt(page);
+    }
+
+    let match = await Match.getLatestMatch(position, page);
+
+    // match data 필터링 해주기
+
+    // redis에 history 추가해주기
+    if (req.user && req.token) {
+      await setHistory(req.user._id, match[0].videosId);
+    }
+
+    res.json({
+      code: Code.GET_MATCH_SUCCESS,
+      data: match
+    });
+  } catch (e) {
+    responseByCode(res, Code.GET_MATCH_FAIL, 400);
+  }
+}
+
+async function getMatchHistory (req, res) {
+  try {
+    let history = await getHistory(req.user._id);
+
+    if (history) {
+      history = history.map((elt) => {
+        return elt.split("-")[1];
+      });
+
+      history = await Match.getMatchesFromIds(history);
+    } else {
+      history = [];
+    }
+
+    res.json({
+      code: Code.GET_MATCH_SUCCESS,
+      data: history
+    });
+  } catch (e) {
+    responseByCode(res, Code.GET_MATCH_FAIL, 400);
+  }
+}
+
+async function getMatchById (req, res) {
+  try {
+    let match = await Match.findOne({videosId: req.params.id});
+
+    // match data 필터링 해주기
+
+    res.json({
+      code: Code.GET_MATCH_SUCCESS,
+      data: match
+    });
+  } catch (e) {
+    responseByCode(res, Code.GET_MATCH_FAIL, 400);
+  }
+}
+
 module.exports = {
   updateLikes,
-  updateViews
+  updateViews,
+  getFilteredMatches,
+  getMatchHistory,
+  getMatchById
 };

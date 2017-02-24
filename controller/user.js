@@ -1,10 +1,11 @@
 import Code             from '../config/responseCode';
 import {responseByCode} from '../helpers/helper';
-import {uploadImg, downloadImg} from '../helpers/s3Helper';
+import {uploadImg, checkAndRemoveImg} from '../helpers/s3Helper';
 import _                from 'lodash';
 import fs               from 'fs';
 import formidable       from 'formidable';
 import {User}           from '../models/user';
+import {removeHistory}  from '../helpers/videoHistory';
 
 const FILE_FORM_NAME = 'userfile';
 
@@ -35,26 +36,39 @@ async function displayNameDoubleCheck (req, res) {
 
 async function uploadProfileImg (req, res) {
   const form = new formidable.IncomingForm();
+  let Key;
+
+  if (req.user.profile.length === 0) {
+    Key = null;
+  } else {
+    Key = req.user.profile[0].key;
+  }
 
   try {
-    form.parse(req, (err, fields, files) => {
-      const {name, path} = files[FILE_FORM_NAME];
+    // 업데이트 하기 전에 기존 프로필 사진 파일 삭제
+    checkAndRemoveImg(Key, (err, data = null) => {
+      if (err) {
+        throw err;
+      }
 
-      uploadImg(req.user._id, name, path, (err, data) => {
-        if (err) {
-          throw err;
-        }
+      form.parse(req, (err, fields, files) => {
+        const {name, path} = files['0'];
 
-        // user 모델 업데이트
-        const profile = { originalName: name, tag: data.Etag, link: data.Link };
-        User.updateProfile(req.user._id, profile).then(() => {
-          res.json({
-            code: Code.POST_USER_SUCCESS,
-            data: { tag: data.Etag, link: data.Link }
+        uploadImg(req.user._id, name, path, (err, data) => {
+          if (err) {
+            throw err;
+          }
+          // user 모델 업데이트
+          const profile = { key: data.newKey, tag: data.Etag, link: data.Location };
+          User.updateProfile(req.user._id, profile).then(() => {
+            res.json({
+              code: Code.POST_USER_SUCCESS,
+              data: { tag: data.Etag, link: data.Link }
+            });
           });
         });
-      });
-    })
+      })
+    });
   } catch (e) {
     console.log(e);
     responseByCode(res, Code.S3_ERROR, 400);
@@ -98,6 +112,9 @@ async function loginUser (req, res) {
 async function logoutUser (req, res) {
   try {
     await req.user.removeToken(req.token);
+
+    // 레디스 히스토리 삭제
+    await removeHistory(req.user._id);
 
     responseByCode(res, Code.DELETE_USER_SUCCESS, 200);
   } catch (e) {

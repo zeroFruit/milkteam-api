@@ -23,6 +23,8 @@ const responseCode = {
 
   PUT_MATCH_SUCCESS:              50,
   PUT_MATCH_FAIL:                 51,
+  GET_MATCH_SUCCESS:              52,
+  GET_MATCH_FAIL:                 53,
 
   AUTHENTICATE_FAIL:              100,
   DOCS_NOT_FOUND:                 101,

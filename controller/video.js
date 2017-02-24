@@ -1,3 +1,5 @@
+import _                from 'lodash';
+import qs               from 'qs';
 import {server}         from '../app';
 import Code             from '../config/responseCode';
 import {
@@ -6,8 +8,7 @@ import {
   removeMatchesWithVideoId,
   generateVideoData
 } from '../helpers/helper';
-import {getThumbnailFromId} from '../helpers/youtubeHelper';
-import _                from 'lodash';
+import {getThumbnailFromId, getYTDuration} from '../helpers/youtubeHelper';
 import {Video}          from '../models/video';
 import {User}           from '../models/user';
 import {Match}          from '../models/match';
@@ -15,14 +16,31 @@ import {MainChatRoom}   from '../models/mainChat';
 import {SubChatRoom}    from '../models/subChat';
 import {alarmIO}        from '../socket/alarm';
 
+/*
+  character, position, tier, customed, page
+*/
 async function getMainVideoByPreference (req, res) {
+  let {character, position, tier, page, customed} = req.query;
+  let videos;
+
   try {
-    let videos = await Video.getVideos();
-    let mainVideos = getMainVideoHelper(req.query, videos);
+    page = parseInt(page);
+    
+    if (!customed) {
+      videos = await Video.getMainVideos(page);
 
-    //메인 비디오 main 속성 업데이트 추가하기
+    } else {
+      videos = await Video.getFilteredMainVideos(page, character, position, tier);
+    }
 
-    res.json({code: Code.GET_VIDEO_SUCCESS, data: mainVideos});
+    videos = videos.map((video) => generateVideoData(video));
+
+    res.json({
+      code: Code.GET_VIDEO_SUCCESS,
+      data: {
+        videos
+      }
+    });
   } catch (e) {
     console.log(e);
     responseByCode(res, Code.GET_VIDEO_FAIL, 400);
@@ -33,8 +51,7 @@ async function getMainVideoByPreference (req, res) {
 // user 컨트롤러 옮기기
 async function getVideos (req, res) {
   try {
-    let videos = await User.getVideos(req.user._id); // [{title, id}, ...]
-    //let likesAndViews = await Match.getLikesAndViewFromVideoId()
+    let videos = await User.getVideos(req.user._id);
 
     res.json({code: Code.GET_VIDEO_SUCCESS, data: videos});
   } catch (e) {
@@ -53,8 +70,9 @@ async function uploadVideo (req, res) {
 
   // 썸네일 링크 가져오기
   let thumbnail = await getThumbnailFromId(body.video.videoId);
+  let duration = await getYTDuration(body.video.videoId);
 
-  body.video = _.assign(body.video, { owner: req.user._id, thumbnail });
+  body.video = _.assign(body.video, { owner: req.user._id, thumbnail, duration });
 
   let video = new Video(body.video);
   let mainChat = new MainChatRoom({videoId: body.video.videoId});
@@ -68,7 +86,12 @@ async function uploadVideo (req, res) {
     let enemyVideo = await Video.match(video.videoId);
 
     if (_.isEmpty(enemyVideo)) { // 기준에 맞는 대결 영상이 없는 경우
-      return res.json({code: Code.POST_VIDEO_SUCCESS, data: {video}});
+      return res.json({
+        code: Code.POST_VIDEO_SUCCESS,
+        data: {
+          video: generateVideoData(video)
+        }
+      });
     }
 
     let match = new Match({
