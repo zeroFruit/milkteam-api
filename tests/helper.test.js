@@ -1,5 +1,6 @@
 import expect from 'expect';
 import helper from '../helpers/helper';
+import {setHistory, getHistory, removeHistory} from '../helpers/videoHistory';
 import {getThumbnailFromId, getYTDuration} from '../helpers/youtubeHelper';
 import {
   videos,
@@ -9,6 +10,7 @@ import {
 } from './seed/setup';
 import {Video} from '../models/video';
 import {Match} from '../models/match';
+import {redisClient} from '../config/redis';
 
 beforeEach(populateVideos);
 beforeEach(populateMatches);
@@ -98,3 +100,18 @@ describe('Youtube API Helper', () => {
     });
   })
 });
+
+// describe('Video History Helper', () => {
+//   it('is setHistory test', (done) => {
+//     const key = 'setHistory_test';
+//
+//   });
+//
+//   it('is getHistory test', (done) => {
+//
+//   });
+//
+//   it('is removeHistory test', (done) => {
+//
+//   })
+// });

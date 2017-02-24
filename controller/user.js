@@ -5,6 +5,7 @@ import _                from 'lodash';
 import fs               from 'fs';
 import formidable       from 'formidable';
 import {User}           from '../models/user';
+import {removeHistory}  from '../helpers/videoHistory';
 
 const FILE_FORM_NAME = 'userfile';
 
@@ -111,6 +112,9 @@ async function loginUser (req, res) {
 async function logoutUser (req, res) {
   try {
     await req.user.removeToken(req.token);
+
+    // 레디스 히스토리 삭제
+    await removeHistory(req.user._id);
 
     responseByCode(res, Code.DELETE_USER_SUCCESS, 200);
   } catch (e) {

@@ -14,22 +14,30 @@ const MatchSchema = new mongoose.Schema({
 const LEFT_LIKES = -1;
 const RIGHT_LIKES = 1;
 
-// MatchSchema.statics.getLikesAndViewFromVideoId = function (matchDocIds, videoDocIds) {
-//   let Match = this;
-//
-//   Match.find({ _id: { $all: matchDocIds } }).then((matches) => {
-//     let len = -1;
-//     return matches.map((match) => {
-//       len++;
-//
-//       if (match.videos[0]._id === videoDocIds[len]) {
-//         return { views: match.views, like: match.lLikes };
-//       } else {
-//         return { views: match.views, like: match.rLikes };
-//       }
-//     });
-//   })
-// }
+MatchSchema.statics.getMatchesFromIds = function (matchIds) {
+  let Match = this;
+
+  return Match.find({ videosId: { $in: matchIds} }).populate('videos').then((matches) => {
+    return matches.map((match) => {
+      if (match.lLikes > match.rLikes) {
+        return {
+          videosId: match.videosId,
+          lTitle: match.videos[0].title,
+          rTitle: match.videos[1].title,
+          thumbnail: match.videos[0].thumbnail // 왼쪽 영상 썸네일 링크
+        }
+      } else {
+        return {
+          videosId: match.videosId,
+          lTitle: match.videos[0].title,
+          rTitle: match.videos[1].title,
+          thumbnail: match.videos[1].thumbnail // 오른쪽 영상 썸네일 링크
+        }
+      }
+    });
+  });
+}
+
 MatchSchema.statics.getLatestMatch = function(position, page = 0) {
   let Match = this;
 
